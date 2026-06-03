@@ -1,0 +1,113 @@
+{
+  "announcements": [
+    {
+      "id": "res-ug-sem2",
+      "title": "UG Semester 2 Examination Results (Session 2025-28)",
+      "date": "2026-05-28",
+      "status": "Declared",
+      "link": "http://result.kolhanuniversity.ac.in/"
+    },
+    {
+      "id": "res-ug-sem5",
+      "title": "UG Semester 5 Examinations (Session 2023-26)",
+      "date": "2026-04-10",
+      "status": "Declared",
+      "link": "http://result.kolhanuniversity.ac.in/"
+    },
+    {
+      "id": "res-pg-sem3",
+      "title": "PG Semester 3 Examinations (Session 2024-26)",
+      "date": "2026-03-18",
+      "status": "Declared",
+      "link": "http://result.kolhanuniversity.ac.in/"
+    },
+    {
+      "id": "res-ug-sem4",
+      "title": "UG Semester 4 Examinations (Session 2024-27)",
+      "date": "Pending",
+      "status": "Awaiting Exams (July 2026)",
+      "link": "#"
+    }
+  ],
+  "passPercentageBySemester": [
+    {
+      "semester": "Semester 1",
+      "passPercentage": 68.5,
+      "totalStudents": 1420
+    },
+    {
+      "semester": "Semester 2",
+      "passPercentage": 72.1,
+      "totalStudents": 1390
+    },
+    {
+      "semester": "Semester 3",
+      "passPercentage": 75.8,
+      "totalStudents": 1350
+    },
+    {
+      "semester": "Semester 4",
+      "passPercentage": 79.2,
+      "totalStudents": 1340
+    },
+    {
+      "semester": "Semester 5",
+      "passPercentage": 82.4,
+      "totalStudents": 1310
+    },
+    {
+      "semester": "Semester 6",
+      "passPercentage": 88.7,
+      "totalStudents": 1290
+    }
+  ],
+  "passPercentageByDepartment": [
+    {
+      "department": "Mathematics",
+      "passPercentage": 82.5,
+      "toppers": ["Animesh Mahato (89.4%)", "Shalini Soy (87.2%)"]
+    },
+    {
+      "department": "Physics",
+      "passPercentage": 78.4,
+      "toppers": ["Rohan Deogam (86.1%)", "Anjali Birua (84.5%)"]
+    },
+    {
+      "department": "Chemistry",
+      "passPercentage": 80.2,
+      "toppers": ["Sourav Kar (88.0%)", "Karan Pingua (83.9%)"]
+    },
+    {
+      "department": "Commerce",
+      "passPercentage": 85.9,
+      "toppers": ["Pooja Agrawal (91.2%)", "Amit Kumar (89.5%)"]
+    },
+    {
+      "department": "Arts",
+      "passPercentage": 76.5,
+      "toppers": ["Deepak Sinku (82.3%)", "Sunita Purty (81.8%)"]
+    }
+  ],
+  "yearlyTrends": [
+    {
+      "year": "2021",
+      "overallPassPercentage": 71.2
+    },
+    {
+      "year": "2022",
+      "overallPassPercentage": 73.8
+    },
+    {
+      "year": "2023",
+      "overallPassPercentage": 76.5
+    },
+    {
+      "year": "2024",
+      "overallPassPercentage": 79.1
+    },
+    {
+      "year": "2025",
+      "overallPassPercentage": 81.3
+    }
+  ]
+}

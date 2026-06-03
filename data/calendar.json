@@ -1,0 +1,26 @@
+[
+  {
+    "day": "15",
+    "month": "June",
+    "title": "Form Fill-up Deadline",
+    "desc": "Semester 4 exam form final date (no fine) on KU Portal."
+  },
+  {
+    "day": "10",
+    "month": "June",
+    "title": "Summer Vacation Starts",
+    "desc": "Tata College campus closed for physical classes."
+  },
+  {
+    "day": "05",
+    "month": "July",
+    "title": "Admissions Close",
+    "desc": "UG Semester 1 admissions final deadline on Chancellor Portal."
+  },
+  {
+    "day": "15",
+    "month": "July",
+    "title": "Exams Commencing",
+    "desc": "Proposed starting date for UG Sem 4 examinations."
+  }
+]

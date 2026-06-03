@@ -1,0 +1,242 @@
+[
+  {
+    "id": "pyq-mj-math1",
+    "title": "2024 Paper - Calculus & Analytical Geometry",
+    "year": "2024",
+    "semester": 1,
+    "category": "Major",
+    "subject": "Mathematics",
+    "downloadCount": 142,
+    "fileSize": "1.2 MB"
+  },
+  {
+    "id": "pyq-mj-math2",
+    "title": "2023 Paper - Calculus & Analytical Geometry",
+    "year": "2023",
+    "semester": 1,
+    "category": "Major",
+    "subject": "Mathematics",
+    "downloadCount": 98,
+    "fileSize": "1.1 MB"
+  },
+  {
+    "id": "pyq-mj-math3",
+    "title": "2024 Paper - Real Analysis - I",
+    "year": "2024",
+    "semester": 2,
+    "category": "Major",
+    "subject": "Mathematics",
+    "downloadCount": 115,
+    "fileSize": "1.4 MB"
+  },
+  {
+    "id": "pyq-mj-math4",
+    "title": "2023 Paper - Real Analysis - I",
+    "year": "2023",
+    "semester": 2,
+    "category": "Major",
+    "subject": "Mathematics",
+    "downloadCount": 85,
+    "fileSize": "1.3 MB"
+  },
+  {
+    "id": "pyq-mj-math5",
+    "title": "2024 Paper - Abstract Algebra - I",
+    "year": "2024",
+    "semester": 3,
+    "category": "Major",
+    "subject": "Mathematics",
+    "downloadCount": 130,
+    "fileSize": "1.5 MB"
+  },
+  {
+    "id": "pyq-mj-phy1",
+    "title": "2024 Paper - Mechanics & Wave Motion",
+    "year": "2024",
+    "semester": 1,
+    "category": "Major",
+    "subject": "Physics",
+    "downloadCount": 167,
+    "fileSize": "1.6 MB"
+  },
+  {
+    "id": "pyq-mj-phy2",
+    "title": "2023 Paper - Mechanics & Wave Motion",
+    "year": "2023",
+    "semester": 1,
+    "category": "Major",
+    "subject": "Physics",
+    "downloadCount": 110,
+    "fileSize": "1.5 MB"
+  },
+  {
+    "id": "pyq-mj-phy3",
+    "title": "2024 Paper - Mathematical Physics - II",
+    "year": "2024",
+    "semester": 3,
+    "category": "Major",
+    "subject": "Physics",
+    "downloadCount": 78,
+    "fileSize": "2.0 MB"
+  },
+  {
+    "id": "pyq-mj-chem1",
+    "title": "2024 Paper - Inorganic Chemistry - I",
+    "year": "2024",
+    "semester": 1,
+    "category": "Major",
+    "subject": "Chemistry",
+    "downloadCount": 125,
+    "fileSize": "1.3 MB"
+  },
+  {
+    "id": "pyq-mj-chem2",
+    "title": "2023 Paper - Inorganic Chemistry - I",
+    "year": "2023",
+    "semester": 1,
+    "category": "Major",
+    "subject": "Chemistry",
+    "downloadCount": 94,
+    "fileSize": "1.2 MB"
+  },
+  {
+    "id": "pyq-mn-phy1",
+    "title": "2024 Paper - Introductory Physics",
+    "year": "2024",
+    "semester": 1,
+    "category": "Minor",
+    "subject": "Physics",
+    "downloadCount": 190,
+    "fileSize": "1.4 MB"
+  },
+  {
+    "id": "pyq-mn-chem1",
+    "title": "2024 Paper - General Chemistry Minor",
+    "year": "2024",
+    "semester": 1,
+    "category": "Minor",
+    "subject": "Chemistry",
+    "downloadCount": 154,
+    "fileSize": "1.5 MB"
+  },
+  {
+    "id": "pyq-mdc-eng1",
+    "title": "2024 Paper - Multidisciplinary English Literature",
+    "year": "2024",
+    "semester": 1,
+    "category": "MDC",
+    "subject": "English",
+    "downloadCount": 210,
+    "fileSize": "980 KB"
+  },
+  {
+    "id": "pyq-mdc-hist1",
+    "title": "2024 Paper - Indian Culture & Heritage MDC",
+    "year": "2024",
+    "semester": 2,
+    "category": "MDC",
+    "subject": "History",
+    "downloadCount": 178,
+    "fileSize": "1.1 MB"
+  },
+  {
+    "id": "pyq-mdc-pol1",
+    "title": "2024 Paper - Introduction to Constitution MDC",
+    "year": "2024",
+    "semester": 1,
+    "category": "MDC",
+    "subject": "Political Science",
+    "downloadCount": 245,
+    "fileSize": "1.2 MB"
+  },
+  {
+    "id": "pyq-vac-env1",
+    "title": "2024 Paper - Environmental Studies (EVS)",
+    "year": "2024",
+    "semester": 1,
+    "category": "VAC",
+    "subject": "Environmental Studies",
+    "downloadCount": 420,
+    "fileSize": "1.0 MB"
+  },
+  {
+    "id": "pyq-vac-ui1",
+    "title": "2024 Paper - Understanding India",
+    "year": "2024",
+    "semester": 2,
+    "category": "VAC",
+    "subject": "Understanding India",
+    "downloadCount": 389,
+    "fileSize": "1.1 MB"
+  },
+  {
+    "id": "pyq-aec-eng1",
+    "title": "2024 Paper - English Communication AEC",
+    "year": "2024",
+    "semester": 1,
+    "category": "AEC",
+    "subject": "English Communication",
+    "downloadCount": 312,
+    "fileSize": "850 KB"
+  },
+  {
+    "id": "pyq-aec-cd1",
+    "title": "2024 Paper - Cyber Defense AEC",
+    "year": "2024",
+    "semester": 2,
+    "category": "AEC",
+    "subject": "Cyber Defense",
+    "downloadCount": 498,
+    "fileSize": "1.2 MB"
+  },
+  {
+    "id": "pyq-sec-cd1",
+    "title": "2024 Paper - Cyber Security & Defense SEC",
+    "year": "2024",
+    "semester": 1,
+    "category": "SEC",
+    "subject": "Cyber Defense",
+    "downloadCount": 289,
+    "fileSize": "1.1 MB"
+  },
+  {
+    "id": "pyq-sec-py1",
+    "title": "2024 Paper - Python Programming SEC",
+    "year": "2024",
+    "semester": 2,
+    "category": "SEC",
+    "subject": "Python Programming",
+    "downloadCount": 345,
+    "fileSize": "1.3 MB"
+  },
+  {
+    "id": "pyq-sec-de1",
+    "title": "2024 Paper - Digital Education SEC",
+    "year": "2024",
+    "semester": 1,
+    "category": "SEC",
+    "subject": "Digital Education",
+    "downloadCount": 412,
+    "fileSize": "1.0 MB"
+  },
+  {
+    "id": "pyq-sec-ent1",
+    "title": "2024 Paper - Entrepreneurship Development SEC",
+    "year": "2024",
+    "semester": 3,
+    "category": "SEC",
+    "subject": "Entrepreneurship",
+    "downloadCount": 185,
+    "fileSize": "1.2 MB"
+  },
+  {
+    "id": "pyq-sec-oa1",
+    "title": "2023 Paper - Office Automation Tools SEC",
+    "year": "2023",
+    "semester": 2,
+    "category": "SEC",
+    "subject": "Office Automation",
+    "downloadCount": 224,
+    "fileSize": "950 KB"
+  }
+]

@@ -1,0 +1,104 @@
+[
+  {
+    "id": "syl-math-ug",
+    "title": "B.Sc Mathematics Honours Syllabus (FYUGP NEP-2020)",
+    "department": "Mathematics",
+    "semester": "All Semesters (1-8)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "2.4 MB",
+    "description": "Complete Four Year Undergraduate Program (FYUGP) syllabus for Mathematics under NEP-2020. Includes course outcomes, detailed topic breakdown (Calculus, Algebra, Real Analysis, Differential Equations, Topology, etc.) and list of recommended textbooks.",
+    "modules": [
+      "Sem 1: MJ-1 (Calculus & Analytical Geometry)",
+      "Sem 2: MJ-2 (Real Analysis - I)",
+      "Sem 3: MJ-3 (Abstract Algebra - I), MN-1 (Introductory Mathematics)",
+      "Sem 4: MJ-4 (Differential Equations), MJ-5 (Numerical Methods)",
+      "Sem 5: MJ-6 (Real Analysis - II), MJ-7 (Linear Algebra)",
+      "Sem 6: MJ-8 (Complex Analysis), MJ-9 (Metric Spaces)"
+    ]
+  },
+  {
+    "id": "syl-phy-ug",
+    "title": "B.Sc Physics Honours Syllabus (FYUGP NEP-2020)",
+    "department": "Physics",
+    "semester": "All Semesters (1-8)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "3.1 MB",
+    "description": "Standard Kolhan University NEP Physics Honours Syllabus containing theoretical and practical schedules for Mechanics, Electricity & Magnetism, Waves & Optics, Thermodynamics, Quantum Mechanics, and Solid State Physics.",
+    "modules": [
+      "Sem 1: MJ-1 (Mathematical Physics-I & Mechanics)",
+      "Sem 2: MJ-2 (Electricity & Magnetism)",
+      "Sem 3: MJ-3 (Thermal Physics & Waves)",
+      "Sem 4: MJ-4 (Mathematical Physics-II), MJ-5 (Digital Electronics)",
+      "Sem 5: MJ-6 (Quantum Mechanics), MJ-7 (Solid State Physics)",
+      "Sem 6: MJ-8 (Electromagnetic Theory), MJ-9 (Statistical Mechanics)"
+    ]
+  },
+  {
+    "id": "syl-chem-ug",
+    "title": "B.Sc Chemistry Honours Syllabus (FYUGP NEP-2020)",
+    "department": "Chemistry",
+    "semester": "All Semesters (1-8)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "2.8 MB",
+    "description": "FYUGP syllabus for Chemistry Honours. Covers Inorganic, Organic, Physical, and Analytical Chemistry, complete with laboratory experiments and safety guidelines.",
+    "modules": [
+      "Sem 1: MJ-1 (Inorganic Chemistry-I & Organic Chemistry-I)",
+      "Sem 2: MJ-2 (Physical Chemistry-I)",
+      "Sem 3: MJ-3 (Inorganic Chemistry-II)",
+      "Sem 4: MJ-4 (Organic Chemistry-II), MJ-5 (Physical Chemistry-II)",
+      "Sem 5: MJ-6 (Inorganic Chemistry-III), MJ-7 (Organic Chemistry-III)",
+      "Sem 6: MJ-8 (Physical Chemistry-III), MJ-9 (Analytical Chemistry)"
+    ]
+  },
+  {
+    "id": "syl-comm-ug",
+    "title": "B.Com Honours Syllabus (FYUGP NEP-2020)",
+    "department": "Commerce",
+    "semester": "All Semesters (1-8)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "2.6 MB",
+    "description": "Detailed syllabus for Bachelor of Commerce (Honours). Includes detailed guidelines for Financial Accounting, Business Law, Corporate Accounting, Income Tax, Management Accounting, and Auditing.",
+    "modules": [
+      "Sem 1: MJ-1 (Financial Accounting & Business Organisation)",
+      "Sem 2: MJ-2 (Business Law)",
+      "Sem 3: MJ-3 (Corporate Accounting)",
+      "Sem 4: MJ-4 (Income Tax Law & Practice), MJ-5 (Business Mathematics)",
+      "Sem 5: MJ-6 (Management Accounting), MJ-7 (Indirect Taxes)",
+      "Sem 6: MJ-8 (Auditing & Corporate Governance), MJ-9 (Financial Management)"
+    ]
+  },
+  {
+    "id": "syl-arts-hist",
+    "title": "B.A History Honours Syllabus (FYUGP NEP-2020)",
+    "department": "Arts",
+    "semester": "All Semesters (1-8)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "1.9 MB",
+    "description": "Kolhan University Bachelor of Arts History Honours FYUGP curriculum. Spans Ancient Indian History, Medieval Europe, Modern India, and World History.",
+    "modules": [
+      "Sem 1: MJ-1 (Idea of Bharat & Ancient Indian History)",
+      "Sem 2: MJ-2 (Social Formations & Cultural Patterns of Ancient World)",
+      "Sem 3: MJ-3 (History of India II: c. 300 to 750 CE)",
+      "Sem 4: MJ-4 (Medieval India), MJ-5 (Rise of Modern West)",
+      "Sem 5: MJ-6 (History of India: 1750-1857), MJ-7 (Modern World)",
+      "Sem 6: MJ-8 (History of India: 1857-1947), MJ-9 (Contemporary India)"
+    ]
+  },
+  {
+    "id": "syl-arts-polsci",
+    "title": "B.A Political Science Syllabus (FYUGP)",
+    "department": "Arts",
+    "semester": "All Semesters (1-8)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "2.1 MB",
+    "description": "FYUGP syllabus for Political Science Honours. Covers political theories, comparative government, public administration, international relations, and Indian political thought.",
+    "modules": [
+      "Sem 1: MJ-1 (Understanding Political Theory)",
+      "Sem 2: MJ-2 (Constitutional Government and Democracy in India)",
+      "Sem 3: MJ-3 (Political Theory: Concepts and Debates)",
+      "Sem 4: MJ-4 (Comparative Government & Politics), MJ-5 (Public Administration)",
+      "Sem 5: MJ-6 (International Relations), MJ-7 (Western Political Thought)",
+      "Sem 6: MJ-8 (Indian Political Thought), MJ-9 (Public Policy in India)"
+    ]
+  }
+]

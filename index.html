@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>Tata College Student Hub | Previous Papers, Syllabus & Results</title>
+  <meta name="description" content="The ultimate student resource portal for Tata College, Chaibasa (Kolhan University). Access PYQs, Semester Syllabus, Notice Board, Result Analysis, and Academic Calculators.">
+  <meta name="keywords" content="Tata College, Chaibasa, Kolhan University, Tata College Student Hub, PYQ, Syllabus, Notice Board, CGPA Calculator, Attendance Calculator, NIMCET, CUET PG, Chaibasa College">
+  <meta name="author" content="Tata College Students">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tata College Student Hub">
+  <meta property="og:description" content="Access previous year papers, syllabi, calculators, and exam updates for Tata College, Chaibasa.">
+  <meta property="og:image" content="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w2.org/2000/svg%22 width=%221200%22 height=%22630%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%230f172a%22/><text y=%2250%25%22 x=%2250%25%22 font-size=%2260%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22%236366f1%22 text-anchor=%22middle%22>TATA COLLEGE STUDENT HUB</text></svg>">
+  
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w2.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%236366f1%22/><text y=%2265%22 x=%2250%22 font-size=%2250%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>T</text></svg>">
+
+  <!-- Stylesheets & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation (Desktop) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <div class="logo-icon">T</div>
+          <span class="logo-text">Tata Hub</span>
+        </div>
+        <p class="college-sub">Tata College, Chaibasa</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#pyqs" class="nav-item" data-view="pyqs">
+          <i data-lucide="file-text"></i>
+          <span>PYQ Papers</span>
+        </a>
+        <a href="#syllabus" class="nav-item" data-view="syllabus">
+          <i data-lucide="book-open"></i>
+          <span>Syllabus Explorer</span>
+        </a>
+        <a href="#notices" class="nav-item" data-view="notices">
+          <i data-lucide="bell"></i>
+          <span>Notice Board</span>
+          <span class="badge" id="notices-count-badge">0</span>
+        </a>
+        <a href="#results" class="nav-item" data-view="results">
+          <i data-lucide="line-chart"></i>
+          <span>Results & Analysis</span>
+        </a>
+        <a href="#resources" class="nav-item" data-view="resources">
+          <i data-lucide="graduation-cap"></i>
+          <span>Academic Corner</span>
+        </a>
+        <a href="#calculators" class="nav-item" data-view="calculators">
+          <i data-lucide="calculator"></i>
+          <span>CGPA Calculator</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="theme-toggle" class="theme-btn" aria-label="Toggle Theme">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+          <span id="theme-text">Light Mode</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="mobile-logo-header">
+          <div class="logo-icon">T</div>
+          <span class="logo-text">Tata Hub</span>
+        </div>
+
+        <div class="search-container">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="global-search-input" placeholder="Search PYQs, syllabus, notices..." aria-label="Search everywhere">
+          <div id="search-dropdown" class="search-dropdown-results hidden"></div>
+        </div>
+
+        <div class="top-bar-actions">
+          <button class="icon-action-btn" id="pwa-install-btn" title="Install App" style="display: none;">
+            <i data-lucide="download-cloud"></i>
+            <span class="btn-tooltip">Install App</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic Page Container -->
+      <main class="page-content" id="app-view">
+        <!-- Rendered dynamically by JavaScript router. Crawlers see semantic fallback. -->
+        <section class="seo-fallback">
+          <h1>Tata College Student Hub</h1>
+          <p>Access question papers, syllabuses, and analysis. Loading interface...</p>
+        </section>
+      </main>
+
+      <!-- Footer (Desktop) -->
+      <footer class="main-footer">
+        <p>&copy; 2026 Tata College Student Hub. Affiliated with Kolhan University, Chaibasa.</p>
+        <div class="footer-links">
+          <a href="#resources">NIMCET Corner</a>
+          <a href="#calculators">CGPA Calculator</a>
+          <a href="https://kuuniv.ac.in/" target="_blank" rel="noopener">KU Portal</a>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+      <a href="#dashboard" class="mobile-nav-item active" data-view="dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Home</span>
+      </a>
+      <a href="#pyqs" class="mobile-nav-item" data-view="pyqs">
+        <i data-lucide="file-text"></i>
+        <span>PYQs</span>
+      </a>
+      <a href="#syllabus" class="mobile-nav-item" data-view="syllabus">
+        <i data-lucide="book-open"></i>
+        <span>Syllabus</span>
+      </a>
+      <a href="#notices" class="mobile-nav-item" data-view="notices">
+        <i data-lucide="bell"></i>
+        <span>Notices</span>
+      </a>
+      <a href="#calculators" class="mobile-nav-item" data-view="calculators">
+        <i data-lucide="calculator"></i>
+        <span>CGPA Calc</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Universal Modal for Details / Viewers -->
+  <div class="modal-overlay hidden" id="universal-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal Title</h3>
+        <button class="close-modal-btn" id="close-modal-btn" aria-label="Close modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Resource Upload Modal -->
+  <div class="modal-overlay hidden" id="upload-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Share Academic Resource</h3>
+        <button class="close-modal-btn" id="close-upload-btn" aria-label="Close modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="upload-resource-form">
+          <div class="form-group">
+            <label for="upload-title">Resource / Paper Title *</label>
+            <input type="text" id="upload-title" required placeholder="e.g., B.Sc Physics Sem 3 Optics 2024">
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="upload-dept">Department *</label>
+              <select id="upload-dept" required>
+                <option value="">Select Department</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Commerce">Commerce</option>
+                <option value="Arts">Arts</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="upload-sem">Semester *</label>
+              <select id="upload-sem" required>
+                <option value="">Select Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="upload-type">Resource Type *</label>
+            <select id="upload-type" required>
+              <option value="PYQ">Previous Year Question Paper (PYQ)</option>
+              <option value="Notes">Lecture Notes / Study Material</option>
+              <option value="Book">Reference Book PDF</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="upload-file">Select File (PDF or Image, max 10MB) *</label>
+            <div class="file-drag-area" id="file-drag-area">
+              <i data-lucide="upload-cloud" class="drag-icon"></i>
+              <p>Drag & Drop file here or <span>Browse</span></p>
+              <input type="file" id="upload-file" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" required>
+              <span id="selected-file-name" class="file-name-indicator hidden"></span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="upload-contributor">Your Name (Optional)</label>
+            <input type="text" id="upload-contributor" placeholder="Help us credit you!">
+          </div>
+          <button type="submit" class="primary-btn full-btn">Submit to Moderator</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Back to Top Button -->
+  <button id="back-to-top" class="back-to-top-btn hidden" aria-label="Back to top">
+    <i data-lucide="chevron-up"></i>
+  </button>
+
+  <!-- Modular Scripts Configuration -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

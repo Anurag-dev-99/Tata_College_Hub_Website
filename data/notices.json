@@ -1,0 +1,81 @@
+[
+  {
+    "id": "notice-1",
+    "title": "UG Semester 4 (Session 2024-27) Exam Form Fill-up Dates Released",
+    "date": "2026-06-02",
+    "category": "Exam",
+    "isPinned": true,
+    "isArchived": false,
+    "description": "Kolhan University has released the official notifications for UG Semester 4 Examination Form Fill-up. Students can fill the form online via the KU Examination Portal. The last date to fill the form without fine is June 15, 2026. A late fine of ₹200 will be applicable from June 16 to June 20, 2026.",
+    "links": [
+      {
+        "label": "Fill Exam Form",
+        "url": "https://kuuniv.ac.in/"
+      },
+      {
+        "label": "Official Notification PDF",
+        "url": "#"
+      }
+    ]
+  },
+  {
+    "id": "notice-2",
+    "title": "Summer Vacation Announcement - College Closed from June 10",
+    "date": "2026-06-01",
+    "category": "General",
+    "isPinned": true,
+    "isArchived": false,
+    "description": "As per the Kolhan University academic calendar, Tata College Chaibasa will remain closed for Summer Vacation from June 10, 2026, to July 05, 2026. However, all administrative operations and exam-related work will continue as scheduled. Classes will resume in offline mode on July 06, 2026.",
+    "links": []
+  },
+  {
+    "id": "notice-3",
+    "title": "B.Sc & B.A Semester 2 Examination Results Declared",
+    "date": "2026-05-28",
+    "category": "Result",
+    "isPinned": false,
+    "isArchived": false,
+    "description": "Kolhan University has announced the results for B.Sc & B.A Semester 2 (Session 2025-28) Examinations. Students of Tata College can check their subject-wise marksheet on the official Kolhan University result portal. Hard copies of TR (Tabulation Register) will be available in the respective departments next week.",
+    "links": [
+      {
+        "label": "Check Result Online",
+        "url": "http://result.kolhanuniversity.ac.in/"
+      }
+    ]
+  },
+  {
+    "id": "notice-4",
+    "title": "Guest Lecture on Career Paths in Higher Education (CSIR-NET/JAM)",
+    "date": "2026-05-25",
+    "category": "Academic",
+    "isPinned": false,
+    "isArchived": false,
+    "description": "The Department of Physics & Mathematics, Tata College is organizing a guest lecture on 'Preparation Strategies for IIT JAM, CSIR-NET & CUET PG' on June 05, 2026, at 11:00 AM in the Multipurpose Hall. Keynote speaker: Dr. R. K. Mahato (IIT Kharagpur Alumnus). Attendance is highly recommended for B.Sc Sem 4 & 6 students.",
+    "links": []
+  },
+  {
+    "id": "notice-5",
+    "title": "Registration Slip Download for UG Semester 1 (Session 2025-28)",
+    "date": "2026-04-15",
+    "category": "Admission",
+    "isPinned": false,
+    "isArchived": true,
+    "description": "All newly admitted students of UG Semester 1 (Session 2025-28) are hereby informed that their Kolhan University Registration Slips are now available for download. Please verify your details (Name, Mother's Name, Father's Name, Subjects) carefully. Any discrepancies must be reported to the college counter before April 30, 2026.",
+    "links": [
+      {
+        "label": "Download Registration Slip",
+        "url": "https://chancellorportal.jharkhanduniversities.nic.in/"
+      }
+    ]
+  },
+  {
+    "id": "notice-6",
+    "title": "Revised Syllabus for FYUGP (Four Year Undergraduate Program)",
+    "date": "2025-09-10",
+    "category": "Academic",
+    "isPinned": false,
+    "isArchived": true,
+    "description": "In accordance with NEP 2020, Kolhan University has adopted the FYUGP curriculum. The syllabus for Major, Minor, SEC, MDC, and AEC papers is updated. Students are advised to download the latest syllabus from the syllabus section of this website or the university website.",
+    "links": []
+  }
+]
