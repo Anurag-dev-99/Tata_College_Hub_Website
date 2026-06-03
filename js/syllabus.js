@@ -1,190 +1,662 @@
 /* ==========================================
    Tata College Student Hub - Syllabus Module
-   Handles listing syllabuses, detailed module
-   views, and downloading syllabus outlines.
+   Redesigned User Flow & Multi-Column Layout
    ========================================== */
 
-import { showToast } from './app.js';
+import { showToast, getAppState, incrementGlobalDownloadCount, SUBMISSION_API_URL } from './app.js';
 import { logRecentlyViewed } from './dashboard.js';
 
+// State variables for routing and filter states
 let syllabusData = [];
+let activeCategory = 'Major';
+let activeSubject = 'Mathematics';
+let activeSemester = 1;
+
+// Mobile Navigation State: 'categories', 'subjects', 'semesters', 'details'
+let mobileStep = 'categories';
+
+// Data mapping of subjects available per category (Kolhan University NEP 2020)
+const categorySubjects = {
+  'Major': ['Mathematics', 'Physics', 'Chemistry', 'Botany', 'Zoology', 'Commerce', 'History', 'Political Science', 'English'],
+  'Minor': ['Mathematics', 'Physics', 'Chemistry', 'Botany', 'Zoology', 'Commerce', 'History', 'Political Science', 'English'],
+  'MDC': ['Hindi', 'English', 'History', 'Political Science', 'Sociology', 'Philosophy', 'Psychology', 'Physics', 'Chemistry', 'Botany', 'Zoology', 'Mathematics', 'Commerce', 'Cyber Defense', 'Labour & Social Welfare'],
+  'SEC': ['Digital Education', 'Cyber Defense', 'Entrepreneurship', 'Python Programming', 'Office Automation'],
+  'VAC': ['Environmental Studies', 'Understanding India', 'Digital Education', 'Health & Wellness'],
+  'AEC': ['English Communication', 'Hindi Communication', 'Cyber Defense', 'Labour & Social Welfare']
+};
 
 export async function initSyllabusView(container) {
-  container.innerHTML = `
-    <div class="animated-slide-up">
-      <div class="page-title-section">
-        <div>
-          <h2 class="page-title">Syllabus Explorer</h2>
-          <p class="page-subtitle">View and download the latest FYUGP curriculum under NEP-2020 for Kolhan University.</p>
-        </div>
-      </div>
-
-      <div class="syllabus-list" id="syllabus-cards-container">
-        <div class="text-secondary" style="text-align: center; padding: 40px 0;">
-          <div class="logo-icon" style="margin: 0 auto 16px auto; font-size: 1.5rem;">T</div>
-          Loading syllabi...
-        </div>
-      </div>
-    </div>
-  `;
-
+  // Fetch actual JSON data if not loaded
   if (syllabusData.length === 0) {
     try {
       const response = await fetch('data/syllabus.json');
       syllabusData = await response.json();
     } catch (err) {
       console.error("Error fetching syllabus data: ", err);
-      showToast("Failed to load syllabuses. Check console.", "error");
+      showToast("Failed to load syllabus records.", "error");
       return;
     }
   }
 
-  renderSyllabusCards();
+  renderMainLayout(container);
 }
 
-function renderSyllabusCards() {
-  const container = document.getElementById('syllabus-cards-container');
-  if (!container) return;
-
-  const savedSyllabus = JSON.parse(localStorage.getItem('tata_saved_syllabus')) || [];
-
-  container.innerHTML = syllabusData.map(syl => {
-    const isSaved = savedSyllabus.some(item => item.id === syl.id);
-    return `
-      <div class="card syllabus-card" data-syl-id="${syl.id}">
-        <div class="syllabus-grid-inner">
+function renderMainLayout(container) {
+  container.innerHTML = `
+    <div class="animated-slide-up">
+      
+      <!-- Top Mobile Navigation Header -->
+      <div class="page-title-section" style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="pyq-mobile-back-btn" id="syl-back-btn" aria-label="Go Back">
+            <i data-lucide="arrow-left"></i>
+          </button>
           <div>
-            <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-              <span class="notice-tag academic">NEP FYUGP</span>
-              <span style="font-size: 0.75rem; color: var(--text-secondary); align-self: center;">Effective: ${syl.effectiveFrom}</span>
-            </div>
-            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">${syl.title}</h3>
-            <p class="text-secondary" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;">${syl.description}</p>
-            
-            <div style="display: flex; gap: 12px; align-items: center;">
-              <button class="primary-btn view-modules-btn" data-id="${syl.id}">
-                <i data-lucide="eye"></i> View Course Content
-              </button>
-              <button class="secondary-btn btn-icon-only bookmark-syl-btn" data-id="${syl.id}" title="${isSaved ? 'Remove Bookmark' : 'Save Syllabus'}">
-                <i data-lucide="bookmark" style="${isSaved ? 'fill: var(--primary); color: var(--primary);' : ''}"></i>
-              </button>
-            </div>
-          </div>
-          
-          <div class="syllabus-modules">
-            <h5>Core Major Syllabus (MJ)</h5>
-            <ul>
-              ${syl.modules.slice(0, 4).map(mod => `<li>${mod}</li>`).join('')}
-              ${syl.modules.length > 4 ? `<li style="list-style: none; font-style: italic; color: var(--text-secondary); margin-top: 4px;">+ ${syl.modules.length - 4} more semesters</li>` : ''}
-            </ul>
+            <h2 class="page-title" id="syl-main-title">Syllabus Explorer</h2>
+            <p class="page-subtitle" id="syl-main-subtitle">Access the official FYUGP NEP-2020 syllabus structures.</p>
           </div>
         </div>
       </div>
-    `;
-  }).join('');
+
+      <!-- Main Columns Grid Container -->
+      <div class="pyq-redesign-container" id="syl-grid-wrapper">
+        
+        <!-- Column 1: Course Category Selector -->
+        <div class="pyq-panel" id="syl-panel-categories">
+          <div class="card" id="syl-card-categories-sec" style="padding: 16px;">
+            <h3 class="pyq-subject-section-title" style="margin-top: 4px;">Choose Course Category</h3>
+            <div class="pyq-categories-list">
+              <button class="pyq-cat-btn ${activeCategory === 'Major' ? 'active' : ''}" data-cat="Major">
+                <span>Major Course</span> <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="pyq-cat-btn ${activeCategory === 'Minor' ? 'active' : ''}" data-cat="Minor">
+                <span>Minor Course</span> <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="pyq-cat-btn ${activeCategory === 'MDC' ? 'active' : ''}" data-cat="MDC">
+                <span>MDC Course</span> <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="pyq-cat-btn ${activeCategory === 'SEC' ? 'active' : ''}" data-cat="SEC">
+                <span>SEC Course</span> <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="pyq-cat-btn ${activeCategory === 'VAC' ? 'active' : ''}" data-cat="VAC">
+                <span>VAC Course</span> <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="pyq-cat-btn ${activeCategory === 'AEC' ? 'active' : ''}" data-cat="AEC">
+                <span>AEC Course</span> <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Subject Selection List -->
+        <div class="pyq-panel" id="syl-panel-subjects">
+          <div class="card" id="syl-card-subjects-sec" style="padding: 16px;">
+            <h3 class="pyq-subject-section-title" id="syl-subject-list-title" style="margin-top: 4px;">Subjects List</h3>
+            <div class="pyq-subjects-list" id="syl-subjects-container-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Semester Tabs and Detailed Syllabus View -->
+        <div class="pyq-panel" id="syl-panel-details">
+          
+          <!-- Semester Selector Cards (Mobile Screen 3 - hidden on desktop) -->
+          <div class="card" id="syl-card-mobile-semesters-sec" style="padding: 16px;">
+            <h3 class="pyq-subject-section-title" id="syl-semesters-list-title" style="margin-top: 4px;">Select Semester</h3>
+            <div class="pyq-subjects-list" id="syl-semesters-container-list">
+              <!-- Stacked semester cards in mobile -->
+            </div>
+          </div>
+
+          <!-- Main Syllabus Content Workspace -->
+          <div class="pyq-center-panel" id="syl-card-details-sec">
+            
+            <!-- Category > Subject > Semester header description -->
+            <div class="card" style="padding: 20px;">
+              <h3 class="pyq-active-header" id="syl-active-header">MATHEMATICS (Major) > SEMESTER 1</h3>
+              <p class="text-secondary" style="font-size: 0.82rem;" id="syl-active-subheader">Syllabus outline and curriculum structure.</p>
+              
+              <!-- Desktop Semester Navigation Tabs -->
+              <div class="pyq-sem-tabs" style="margin-top: 16px;">
+                <button class="pyq-sem-tab ${activeSemester === 1 ? 'active' : ''}" data-sem="1">Sem 1</button>
+                <button class="pyq-sem-tab ${activeSemester === 2 ? 'active' : ''}" data-sem="2">Sem 2</button>
+                <button class="pyq-sem-tab ${activeSemester === 3 ? 'active' : ''}" data-sem="3">Sem 3</button>
+                <button class="pyq-sem-tab ${activeSemester === 4 ? 'active' : ''}" data-sem="4">Sem 4</button>
+                <button class="pyq-sem-tab ${activeSemester === 5 ? 'active' : ''}" data-sem="5">Sem 5</button>
+                <button class="pyq-sem-tab ${activeSemester === 6 ? 'active' : ''}" data-sem="6">Sem 6</button>
+              </div>
+
+              <!-- Active Semester Module Box -->
+              <div id="syl-active-module-box" style="margin-top: 16px; background: rgba(0,0,0,0.15); padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.88rem; font-weight: 700; color: var(--primary); border-left: 4px solid var(--primary); display: none;"></div>
+            </div>
+
+            <!-- Syllabus Document Details -->
+            <div id="syl-details-wrapper">
+              <!-- Rendered dynamically -->
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Help Widgets -->
+      <div class="pyq-panel pyq-forms-col" id="syl-panel-help-widgets">
+        
+        <!-- Request Syllabus Widget -->
+        <div class="card">
+          <h3 class="section-title" style="font-size: 1.05rem; margin-bottom: 8px;"><i data-lucide="help-circle"></i> Can't find your syllabus?</h3>
+          <p class="text-secondary" style="font-size: 0.78rem; margin-bottom: 14px;">Submit a request and we'll retrieve it from the university archive.</p>
+          
+          <form id="syl-request-form">
+            <div class="form-group">
+              <label style="font-size: 0.75rem;">Course Category</label>
+              <select id="syl-req-cat" class="filter-select" style="width: 100%;" required>
+                <option value="Major">Major Course</option>
+                <option value="Minor">Minor Course</option>
+                <option value="MDC">MDC Course</option>
+                <option value="SEC">SEC Course</option>
+                <option value="VAC">VAC Course</option>
+                <option value="AEC">AEC Course</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.75rem;">Subject Name</label>
+              <input type="text" id="syl-req-subject" placeholder="e.g. Mathematics" required style="width: 100%; padding: 8px 12px; border-radius: var(--radius-md); background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary);">
+            </div>
+            <button type="submit" class="primary-btn full-btn" style="margin-top: 4px;">Submit Request</button>
+          </form>
+        </div>
+
+        <!-- Share Syllabus Widget -->
+        <div class="card">
+          <h3 class="section-title" style="font-size: 1.05rem; margin-bottom: 8px;"><i data-lucide="upload"></i> Share a Syllabus</h3>
+          <p class="text-secondary" style="font-size: 0.78rem; margin-bottom: 14px;">Upload official syllabus files to build the community database.</p>
+          
+          <div class="upload-box-help" id="syl-submit-widget-trigger">
+            <i data-lucide="file-text" class="drag-icon" style="width: 32px; height: 32px; color: var(--primary);"></i>
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 8px;">Drag & Drop PDF here</p>
+            <p class="text-secondary" style="font-size: 0.7rem; margin-top: 2px;">or tap to select file</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  `;
 
   lucide.createIcons();
-  setupSyllabusListeners();
+
+  // Draw content views based on active steps
+  renderSubjectsList();
+  renderSemestersList();
+  renderSyllabusDetails();
+
+  // Control mobile panels visibility based on mobileStep
+  applyResponsiveStepClasses();
+
+  // Attach event handlers
+  setupLayoutListeners(container);
 }
 
-function setupSyllabusListeners() {
-  document.querySelectorAll('.view-modules-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const sylId = btn.getAttribute('data-id');
-      const syl = syllabusData.find(s => s.id === sylId);
-      if (syl) openSyllabusDetailModal(syl);
-    });
-  });
+function renderSubjectsList() {
+  const container = document.getElementById('syl-subjects-container-list');
+  const titleEl = document.getElementById('syl-subject-list-title');
+  if (!container) return;
 
-  document.querySelectorAll('.bookmark-syl-btn').forEach(btn => {
+  const subjects = categorySubjects[activeCategory] || [];
+  titleEl.textContent = `${activeCategory.toUpperCase()} SUBJECTS`;
+
+  container.innerHTML = subjects.map(sub => `
+    <button class="pyq-sub-btn ${activeSubject === sub ? 'active' : ''}" data-sub="${sub}">
+      <i data-lucide="book-open"></i> <span>${sub}</span>
+    </button>
+  `).join('');
+
+  lucide.createIcons();
+
+  // Bind subject select
+  container.querySelectorAll('.pyq-sub-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const sylId = btn.getAttribute('data-id');
-      toggleSyllabusBookmark(sylId);
+      activeSubject = btn.getAttribute('data-sub');
+      
+      // Update highlights
+      container.querySelectorAll('.pyq-sub-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Go to semester list step in mobile, or update content in desktop
+      if (isMobileView()) {
+        mobileStep = 'semesters';
+      }
+      
+      // Re-draw lists
+      renderSemestersList();
+      renderSyllabusDetails();
+      applyResponsiveStepClasses();
     });
   });
 }
 
-function toggleSyllabusBookmark(sylId) {
-  const syl = syllabusData.find(s => s.id === sylId);
-  if (!syl) return;
+function renderSemestersList() {
+  const container = document.getElementById('syl-semesters-container-list');
+  const titleEl = document.getElementById('syl-semesters-list-title');
+  if (!container) return;
 
+  titleEl.textContent = `${activeSubject.toUpperCase()} SEMESTERS`;
+
+  container.innerHTML = [1, 2, 3, 4, 5, 6].map(sem => `
+    <button class="pyq-cat-btn ${activeSemester === sem ? 'active' : ''}" data-sem="${sem}" style="justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <i data-lucide="calendar"></i>
+        <span>Semester ${sem}</span>
+      </div>
+      <span style="font-size: 0.72rem; color: var(--text-secondary); background: rgba(0,0,0,0.15); padding: 2px 8px; border-radius: var(--radius-full);">
+        View Syllabus
+      </span>
+    </button>
+  `).join('');
+
+  lucide.createIcons();
+
+  // Bind click
+  container.querySelectorAll('.pyq-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeSemester = parseInt(btn.getAttribute('data-sem'));
+      
+      // Sync desktop semester navigation tabs
+      document.querySelectorAll('.pyq-sem-tab').forEach(tab => {
+        if (parseInt(tab.getAttribute('data-sem')) === activeSemester) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      // Go to details step in mobile
+      if (isMobileView()) {
+        mobileStep = 'details';
+      }
+
+      renderSyllabusDetails();
+      applyResponsiveStepClasses();
+    });
+  });
+}
+
+function renderSyllabusDetails() {
+  const container = document.getElementById('syl-details-wrapper');
+  const headerEl = document.getElementById('syl-active-header');
+  const subheaderEl = document.getElementById('syl-active-subheader');
+  const activeModuleBox = document.getElementById('syl-active-module-box');
+
+  if (!container) return;
+
+  // Update header text
+  headerEl.textContent = `${activeSubject.toUpperCase()} (${activeCategory}) > SEMESTER ${activeSemester}`;
+  subheaderEl.textContent = `NEP curriculum outline and course progression for Semester ${activeSemester}.`;
+
+  // Get matching syllabus document (real or dynamic)
+  const syl = getSyllabusDocument(activeCategory, activeSubject);
+
+  const savedSyllabus = JSON.parse(localStorage.getItem('tata_saved_syllabus')) || [];
+  const isSaved = savedSyllabus.some(item => item.id === syl.id);
+
+  // Extract the specific module text for activeSemester
+  let activeModuleText = "No syllabus modules found for this semester.";
+  if (syl.modules && syl.modules.length > 0) {
+    // Attempt to match semester directly e.g. "Sem 1:" or fallback to index matching
+    const matchingModule = syl.modules.find(m => m.toLowerCase().includes(`sem ${activeSemester}:`));
+    if (matchingModule) {
+      activeModuleText = matchingModule;
+    } else {
+      activeModuleText = syl.modules[activeSemester - 1] || syl.modules[0];
+    }
+  }
+
+  // Update the header card module text element
+  if (activeModuleBox) {
+    activeModuleBox.textContent = activeModuleText;
+    activeModuleBox.style.display = 'block';
+  }
+
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Core Info Card -->
+      <div class="card" style="padding: 24px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+          <span class="notice-tag academic">NEP FYUGP</span>
+          <span style="font-size: 0.75rem; color: var(--text-secondary); align-self: center;">Effective: ${syl.effectiveFrom}</span>
+          <span style="font-size: 0.75rem; color: var(--text-secondary); align-self: center; margin-left: auto;">File Size: ${syl.fileSize}</span>
+        </div>
+        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; color: var(--text-primary);">${syl.title}</h3>
+        <p class="text-secondary" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 20px;">${syl.description}</p>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <button class="primary-btn syl-download-trigger" data-id="${syl.id}">
+            <i data-lucide="download"></i> Download Entire PDF
+          </button>
+          <button class="secondary-btn btn-icon-only syl-save-trigger ${isSaved ? 'active' : ''}" data-id="${syl.id}" title="${isSaved ? 'Remove' : 'Save'}">
+            <i data-lucide="bookmark" style="${isSaved ? 'fill: var(--primary); color: var(--primary);' : ''}"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  lucide.createIcons();
+
+  // Attach button triggers
+  container.querySelector('.syl-download-trigger').addEventListener('click', () => {
+    handleSyllabusDownload(syl);
+  });
+
+  container.querySelector('.syl-save-trigger').addEventListener('click', () => {
+    toggleSyllabusBookmark(syl);
+  });
+}
+
+function getSyllabusDocument(category, subject) {
+  const normalizedSub = subject.toLowerCase();
+  
+  // Search in static loaded list
+  const match = syllabusData.find(s => {
+    const titleL = s.title.toLowerCase();
+    const deptL = s.department.toLowerCase();
+    return titleL.includes(normalizedSub) || deptL.includes(normalizedSub);
+  });
+
+  if (match) {
+    return match;
+  }
+
+  // Fallback: Generate dynamic consistent NEP mock syllabus
+  const mockId = `syl-mock-${normalizedSub.replace(/[^a-z0-9]/g, '-')}`;
+  return {
+    id: mockId,
+    title: `B.Sc/B.A ${subject} Syllabus (${category} FYUGP NEP)`,
+    department: subject,
+    semester: "All Semesters (1-8)",
+    effectiveFrom: "2022 onwards",
+    fileSize: "2.1 MB",
+    description: `Official undergraduate curriculum structure for ${subject} under the NEP-2020 FYUGP guidelines of Kolhan University. Includes syllabus contents, mark breakdown, and credit allocations.`,
+    modules: [
+      `Sem 1: MJ-1 (Introduction to ${subject} Foundations)`,
+      `Sem 2: MJ-2 (Fundamental Core Principles in ${subject})`,
+      `Sem 3: MJ-3 (Intermediate Core Theories of ${subject})`,
+      `Sem 4: MJ-4 (${subject} Analytical Studies & Methods)`,
+      `Sem 5: MJ-5 (Advanced Core Electives in ${subject})`,
+      `Sem 6: MJ-6 (Specialized ${subject} Studies & Research Project)`
+    ]
+  };
+}
+
+
+
+function toggleSyllabusBookmark(syl) {
   let savedList = JSON.parse(localStorage.getItem('tata_saved_syllabus')) || [];
-  const index = savedList.findIndex(item => item.id === sylId);
+  const idx = savedList.findIndex(item => item.id === syl.id);
 
-  if (index === -1) {
+  if (idx === -1) {
     savedList.push({
       id: syl.id,
       title: syl.title,
       department: syl.department
     });
     localStorage.setItem('tata_saved_syllabus', JSON.stringify(savedList));
-    showToast(`Saved "${syl.title}" to Dashboard`, 'success');
+    showToast(`Saved bookmark for ${syl.title}`, 'success');
   } else {
-    savedList.splice(index, 1);
+    savedList.splice(idx, 1);
     localStorage.setItem('tata_saved_syllabus', JSON.stringify(savedList));
-    showToast(`Removed bookmark for "${syl.title}"`, 'info');
+    showToast(`Removed bookmark`, 'info');
   }
 
-  renderSyllabusCards();
+  renderSyllabusDetails();
 }
 
-function openSyllabusDetailModal(syl) {
-  const modal = document.getElementById('universal-modal');
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
-
-  if (!modal || !title || !body) return;
-
-  // Track in recently viewed
+function handleSyllabusDownload(syl) {
+  incrementGlobalDownloadCount();
   logRecentlyViewed(syl.id, syl.title, 'syllabus');
 
-  title.textContent = syl.title;
-  body.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 16px;">
-      <p class="text-secondary" style="font-size: 0.9rem; line-height: 1.5;">${syl.description}</p>
+  // Trigger simulated file download
+  const dummyContent = `TATA COLLEGE RESOURCE PORTAL\n===========================\nNEP FYUGP SYLLABUS\nSyllabus for: ${syl.title}\nDepartment: ${syl.department}\nEffective From: ${syl.effectiveFrom}\n\nSEMESTER PROGRESSIONS:\n` + syl.modules.join('\n') + `\n\n[End of File]`;
+  const blob = new Blob([dummyContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${syl.title.replace(/\s+/g, '_')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`Downloading Syllabus: ${syl.title}`, 'success');
+}
+
+// Controller to hide/show panels in Mobile view based on active step
+function applyResponsiveStepClasses() {
+  const panelCategories = document.getElementById('syl-panel-categories');
+  const panelSubjects = document.getElementById('syl-panel-subjects');
+  const panelDetails = document.getElementById('syl-panel-details');
+  const panelHelpWidgets = document.getElementById('syl-panel-help-widgets');
+
+  const cardCategoriesSec = document.getElementById('syl-card-categories-sec');
+  const cardSubjectsSec = document.getElementById('syl-card-subjects-sec');
+  const cardMobileSemestersSec = document.getElementById('syl-card-mobile-semesters-sec');
+  const cardDetailsSec = document.getElementById('syl-card-details-sec');
+
+  const backBtn = document.getElementById('syl-back-btn');
+  const mainTitle = document.getElementById('syl-main-title');
+  const mainSubtitle = document.getElementById('syl-main-subtitle');
+
+  if (!panelCategories) return;
+
+  // Determine if in desktop or mobile view
+  if (!isMobileView()) {
+    // Reset all hidden states for desktop view (3-column layout)
+    panelCategories.classList.remove('pyq-mobile-hidden');
+    panelSubjects.classList.remove('pyq-mobile-hidden');
+    panelDetails.classList.remove('pyq-mobile-hidden');
+    if (panelHelpWidgets) {
+      panelHelpWidgets.classList.remove('pyq-mobile-hidden');
+    }
+
+    cardCategoriesSec.classList.remove('pyq-mobile-hidden');
+    cardSubjectsSec.classList.remove('pyq-mobile-hidden');
+    cardDetailsSec.classList.remove('pyq-mobile-hidden');
+
+    // Hide mobile stacked semesters card on desktop (use horizontal tabs instead)
+    cardMobileSemestersSec.classList.add('pyq-desktop-hidden');
+    cardMobileSemestersSec.classList.remove('pyq-mobile-hidden');
+
+    backBtn.style.display = 'none';
+    mainTitle.textContent = "Syllabus Explorer";
+    mainSubtitle.textContent = "Access the official FYUGP NEP-2020 syllabus structures.";
+    return;
+  }
+
+  // Active steps filters for Mobile
+  backBtn.style.display = 'flex';
+  cardMobileSemestersSec.classList.remove('pyq-desktop-hidden'); // Make sure desktop hidden utility is removed in mobile
+  
+  if (mobileStep === 'categories') {
+    backBtn.style.display = 'none'; // No back button on home step
+    mainTitle.textContent = "SYLLABUS CATEGORIES";
+    mainSubtitle.textContent = "Choose course category to explore syllabus.";
+
+    panelCategories.classList.remove('pyq-mobile-hidden');
+    panelSubjects.classList.add('pyq-mobile-hidden');
+    panelDetails.classList.add('pyq-mobile-hidden');
+    if (panelHelpWidgets) {
+      panelHelpWidgets.classList.add('pyq-mobile-hidden');
+    }
+  } 
+  
+  else if (mobileStep === 'subjects') {
+    mainTitle.textContent = `${activeCategory.toUpperCase()} SYLLABUS`;
+    mainSubtitle.textContent = "Select subject from the listing below.";
+
+    panelCategories.classList.add('pyq-mobile-hidden');
+    panelSubjects.classList.remove('pyq-mobile-hidden');
+    panelDetails.classList.add('pyq-mobile-hidden');
+    if (panelHelpWidgets) {
+      panelHelpWidgets.classList.add('pyq-mobile-hidden');
+    }
+  } 
+  
+  else if (mobileStep === 'semesters') {
+    mainTitle.textContent = activeSubject.toUpperCase();
+    mainSubtitle.textContent = "Choose your semester to see outline.";
+
+    panelCategories.classList.add('pyq-mobile-hidden');
+    panelSubjects.classList.add('pyq-mobile-hidden');
+    
+    panelDetails.classList.remove('pyq-mobile-hidden');
+    cardMobileSemestersSec.classList.remove('pyq-mobile-hidden');
+    cardDetailsSec.classList.add('pyq-mobile-hidden');
+    if (panelHelpWidgets) {
+      panelHelpWidgets.classList.add('pyq-mobile-hidden');
+    }
+  } 
+  
+  else if (mobileStep === 'details') {
+    mainTitle.textContent = `${activeSubject.toUpperCase()} SEM ${activeSemester}`;
+    mainSubtitle.textContent = "View details and download course syllabus.";
+
+    panelCategories.classList.add('pyq-mobile-hidden');
+    panelSubjects.classList.add('pyq-mobile-hidden');
+    
+    panelDetails.classList.remove('pyq-mobile-hidden');
+    cardMobileSemestersSec.classList.add('pyq-desktop-hidden');
+    cardDetailsSec.classList.remove('pyq-mobile-hidden');
+    if (panelHelpWidgets) {
+      panelHelpWidgets.classList.remove('pyq-mobile-hidden');
+    }
+  }
+}
+
+function setupLayoutListeners(container) {
+  // 1. Category Switch Buttons
+  container.querySelectorAll('.pyq-cat-btn[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.getAttribute('data-cat');
       
-      <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Semester-wise Course Structure</h4>
-        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
-          ${syl.modules.map(mod => `
-            <li style="display: flex; gap: 10px; align-items: flex-start; padding: 4px 0;">
-              <i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--success); flex-shrink: 0; margin-top: 2px;"></i>
-              <span>${mod}</span>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
+      // Select first subject from new category as default
+      const subjects = categorySubjects[activeCategory] || [];
+      activeSubject = subjects[0] || '';
+      activeSemester = 1;
 
-      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
-        <button class="secondary-btn" id="close-syl-modal">Close</button>
-        <button class="primary-btn" id="download-syl-outline-btn">
-          <i data-lucide="download"></i> Download Syllabus PDF
-        </button>
-      </div>
-    </div>
-  `;
+      // Highlight active category
+      container.querySelectorAll('.pyq-cat-btn[data-cat]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-  lucide.createIcons();
-  modal.classList.remove('hidden');
+      if (isMobileView()) {
+        mobileStep = 'subjects';
+      }
 
-  document.getElementById('close-syl-modal').addEventListener('click', () => {
-    modal.classList.add('hidden');
+      renderSubjectsList();
+      renderSemestersList();
+      renderSyllabusDetails();
+      applyResponsiveStepClasses();
+    });
   });
 
-  document.getElementById('download-syl-outline-btn').addEventListener('click', () => {
-    // Generate dummy file
-    const dummySyllabus = `TATA COLLEGE RESOURCE PORTAL\n===========================\nSyllabus for: ${syl.title}\nEffective From: ${syl.effectiveFrom}\n\nSEMESTER PROGRESSIONS:\n` + syl.modules.join('\n') + `\n\n[End of File]`;
-    const blob = new Blob([dummySyllabus], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${syl.title.replace(/\s+/g, '_')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // 2. Desktop Semester Navigation Tabs
+  container.querySelectorAll('.pyq-sem-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeSemester = parseInt(tab.getAttribute('data-sem'));
 
-    showToast(`Downloading: ${syl.title}`, 'success');
-    modal.classList.add('hidden');
+      // Highlight active tab
+      container.querySelectorAll('.pyq-sem-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      renderSyllabusDetails();
+    });
   });
+
+  // 3. Mobile Back Navigation Button Click
+  const backBtn = container.querySelector('#syl-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (mobileStep === 'subjects') {
+        mobileStep = 'categories';
+      } else if (mobileStep === 'semesters') {
+        mobileStep = 'subjects';
+      } else if (mobileStep === 'details') {
+        mobileStep = 'semesters';
+      }
+      applyResponsiveStepClasses();
+    });
+  }
+
+  // 4. Request syllabus form submit listener
+  const reqForm = container.querySelector('#syl-request-form');
+  if (reqForm) {
+    reqForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cat = document.getElementById('syl-req-cat').value;
+      const subject = document.getElementById('syl-req-subject').value;
+
+      const submitBtn = reqForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const payload = {
+          formType: "syllabus_request",
+          category: cat,
+          subject: subject
+        };
+
+        if (SUBMISSION_API_URL && SUBMISSION_API_URL !== "YOUR_GOOGLE_SCRIPT_WEB_APP_URL") {
+          const response = await fetch(SUBMISSION_API_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const resData = await response.json();
+          if (resData.status === "success") {
+            showToast(`Request for ${subject} syllabus submitted!`, 'success');
+          } else {
+            console.error("Request failed: ", resData.message);
+            showToast(`Request failed: ${resData.message}. Showing simulated status.`, 'warning');
+          }
+        } else {
+          console.log("Simulating request payload: ", payload);
+          showToast(`Syllabus request submitted successfully!`, 'success');
+          showToast(`Looking for: ${subject} (${cat})`, 'info');
+        }
+
+        reqForm.reset();
+
+      } catch (err) {
+        console.error("Submission error: ", err);
+        showToast("Error sending request. Please try again.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+  }
+
+  // 5. Submit syllabus widget launch modal
+  const uploadTrigger = container.querySelector('#syl-submit-widget-trigger');
+  if (uploadTrigger) {
+    uploadTrigger.addEventListener('click', () => {
+      document.getElementById('upload-modal').classList.remove('hidden');
+    });
+  }
+
+  // Handle window resizing to sync layout rules instantly
+  window.addEventListener('resize', applyResponsiveStepClasses);
+}
+
+function isMobileView() {
+  return window.innerWidth < 768;
 }
