@@ -7,8 +7,6 @@
 import { showToast } from './app.js';
 
 let resultsData = null;
-let semChartInstance = null;
-let deptChartInstance = null;
 
 export async function initResultsView(container) {
   container.innerHTML = `
@@ -67,22 +65,6 @@ export async function initResultsView(container) {
 
       </div>
 
-      <!-- Charts & Visual Analytics -->
-      <div class="card" style="margin-bottom: 24px;">
-        <h3 class="section-title" style="margin-bottom: 20px;"><i data-lucide="trending-up"></i> Academic Performance Analysis</h3>
-        
-        <div class="chart-container-row">
-          <div class="chart-card">
-            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; text-align: center; color: var(--text-secondary);">Semester-wise Pass Percentage Trend</h4>
-            <canvas id="semester-trend-chart"></canvas>
-          </div>
-          <div class="chart-card">
-            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; text-align: center; color: var(--text-secondary);">Department Pass Percentage Comparison</h4>
-            <canvas id="department-compare-chart"></canvas>
-          </div>
-        </div>
-      </div>
-
     </div>
   `;
 
@@ -105,9 +87,6 @@ export async function initResultsView(container) {
 
   // Populate CGPA input rows
   renderCgpaInputs();
-
-  // Initialize and draw Charts
-  initAcademicCharts();
 
   // CGPA event listener
   document.getElementById('calculate-cgpa-btn').addEventListener('click', calculateCumulativeCgpa);
@@ -207,104 +186,3 @@ function calculateCumulativeCgpa() {
   showToast(`CGPA Computed: ${cgpa.toFixed(2)}`, 'success');
 }
 
-function initAcademicCharts() {
-  if (!resultsData) return;
-
-  const semCanvas = document.getElementById('semester-trend-chart');
-  const deptCanvas = document.getElementById('department-compare-chart');
-
-  if (!semCanvas || !deptCanvas) return;
-
-  // Clean up existing instances to prevent chart memory leaks
-  if (semChartInstance) semChartInstance.destroy();
-  if (deptChartInstance) deptChartInstance.destroy();
-
-  // Custom styling colors (matching CSS variables)
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const textColor = isDark ? '#94a3b8' : '#475569';
-
-  // 1. Semester trend chart (Line Chart)
-  const semLabels = resultsData.passPercentageBySemester.map(s => s.semester);
-  const semData = resultsData.passPercentageBySemester.map(s => s.passPercentage);
-
-  semChartInstance = new Chart(semCanvas.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: semLabels,
-      datasets: [{
-        label: 'Pass Percentage (%)',
-        data: semData,
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        borderWidth: 3,
-        tension: 0.35,
-        fill: true,
-        pointBackgroundColor: '#8b5cf6',
-        pointRadius: 5
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          min: 50,
-          max: 100,
-          grid: { color: gridColor },
-          ticks: { color: textColor }
-        },
-        x: {
-          grid: { display: false },
-          ticks: { color: textColor }
-        }
-      }
-    }
-  });
-
-  // 2. Department pass percentage chart (Bar Chart)
-  const deptLabels = resultsData.passPercentageByDepartment.map(d => d.department);
-  const deptData = resultsData.passPercentageByDepartment.map(d => d.passPercentage);
-
-  deptChartInstance = new Chart(deptCanvas.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: deptLabels,
-      datasets: [{
-        label: 'Pass %',
-        data: deptData,
-        backgroundColor: [
-          'rgba(99, 102, 241, 0.75)', // Math - Violet
-          'rgba(6, 182, 212, 0.75)',  // Physics - Cyan
-          'rgba(16, 185, 129, 0.75)', // Chem - Green
-          'rgba(245, 158, 11, 0.75)', // Commerce - Orange
-          'rgba(239, 68, 68, 0.75)'   // Arts - Red
-        ],
-        borderWidth: 0,
-        borderRadius: 8
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          min: 50,
-          max: 100,
-          grid: { color: gridColor },
-          ticks: { color: textColor }
-        },
-        x: {
-          grid: { display: false },
-          ticks: { color: textColor }
-        }
-      }
-    }
-  });
-}

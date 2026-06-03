@@ -228,6 +228,16 @@ function handleRouting() {
       break;
   }
 
+  // Hide footer on results page
+  const mainFooter = document.querySelector('.main-footer');
+  if (mainFooter) {
+    if (cleanViewName === '#results') {
+      mainFooter.style.display = 'none';
+    } else {
+      mainFooter.style.display = '';
+    }
+  }
+
   // Back to top on route change
   window.scrollTo(0, 0);
 }
