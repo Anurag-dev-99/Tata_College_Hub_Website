@@ -213,9 +213,6 @@ function handleRouting() {
     case '#results':
       initResultsView(pageContainer);
       break;
-    case '#resources':
-      initResourcesView(pageContainer);
-      break;
     case '#calculators':
       initCalculatorsView(pageContainer);
       break;
@@ -278,10 +275,6 @@ function updateSeoMetadata(view, params) {
       title = "Result & Analysis | Tata College Student Hub";
       description = "Compare pass percentages of Tata College departments. Real-time CGPA calculations.";
       break;
-    case '#resources':
-      title = "Academic Corner & NIMCET Preparation | Tata College Student Hub";
-      description = "Access textbook references and entrance guides for NIMCET and CUET PG.";
-      break;
     case '#calculators':
       title = "Student Calculators | Tata College Student Hub";
       description = "Compute target class attendance levels and cumulative semester CGPA scores.";
@@ -295,119 +288,6 @@ function updateSeoMetadata(view, params) {
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', description);
 }
-
-// Render Academic Corner View (Notes, NIMCET, Books)
-function initResourcesView(container) {
-  container.innerHTML = `
-    <div class="animated-slide-up">
-      <div class="page-title-section">
-        <div>
-          <h2 class="page-title">Academic Corner</h2>
-          <p class="page-subtitle">Handy books reference guides, lecture notes, and PG entrance corners.</p>
-        </div>
-      </div>
-
-      <div class="pg-section">
-        <!-- Left: NIMCET & CUET Corner -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-          <div class="card exam-info-card">
-            <div class="exam-tag-row">
-              <span class="exam-badge">NIMCET Corner</span>
-              <span class="exam-badge" style="background: var(--success-glow); color: var(--success);">MCA Aspirants</span>
-            </div>
-            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 12px;">NIMCET (National Institute of Technology MCA Common Entrance Test)</h3>
-            <p class="text-secondary" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
-              For B.Sc Mathematics and BCA students at Tata College aspiring to pursue MCA in NITs, NIMCET is the golden gate. Here is a breakdown of the key parameters to kickstart your preparation:
-            </p>
-
-            <div style="background: rgba(0,0,0,0.15); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
-              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: var(--primary);">Exam Pattern & Marks Distribution</h4>
-              <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
-                <li>📐 <strong>Mathematics:</strong> 50 Questions (Maximum 200 Marks) - <em>The highest weightage topic!</em></li>
-                <li>🧠 <strong>Analytical Ability & Logical Reasoning:</strong> 40 Questions (Maximum 160 Marks)</li>
-                <li>💻 <strong>Computer Awareness:</strong> 10 Questions (Maximum 40 Marks)</li>
-                <li>🔤 <strong>General English:</strong> 20 Questions (Maximum 80 Marks)</li>
-              </ul>
-              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-style: italic;">* Note: NIMCET marking features negative marking of 25% for incorrect attempts.</p>
-            </div>
-
-            <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 12px;">Recommended Preparation Materials</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div style="padding: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
-                <h5 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Mathematics foundation</h5>
-                <p class="text-secondary" style="font-size: 0.75rem;">RD Sharma Subjective/Objective (Vol 1 & 2), NCERT 11th & 12th math guides.</p>
-              </div>
-              <div style="padding: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
-                <h5 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Reasoning & Aptitude</h5>
-                <p class="text-secondary" style="font-size: 0.75rem;">RS Aggarwal Modern Approach to Verbal & Non-Verbal Reasoning.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- CUET PG Corner -->
-          <div class="card exam-info-card">
-            <div class="exam-tag-row">
-              <span class="exam-badge" style="background: var(--info-glow); color: var(--info);">CUET PG</span>
-              <span class="exam-badge" style="background: var(--warning-glow); color: var(--warning);">M.Sc & M.A Exams</span>
-            </div>
-            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 12px;">CUET PG Corner (Common University Entrance Test)</h3>
-            <p class="text-secondary" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
-              Required for admissions into Master's Programs (M.Sc, M.A, M.Com, MBA) across Central, State and participating Private Universities globally.
-            </p>
-            <div style="background: rgba(0,0,0,0.15); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 0.85rem;">
-              <p><strong>Core Syllabus Strategy:</strong> Focus heavily on your graduation core subjects. For M.Sc Physics, review electrodynamics and quantum basics. For Mathematics, focus on abstract algebra and complex variables.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Textbooks guides and upload info -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-          <!-- Core textbooks lists -->
-          <div class="card">
-            <h3 class="section-title" style="margin-bottom: 16px;"><i data-lucide="book" style="color: var(--primary);"></i> Recommended Textbooks</h3>
-            
-            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem;">
-              <div>
-                <span class="notice-tag exam" style="font-size: 0.65rem;">B.Sc Maths</span>
-                <p style="font-weight: 600; margin-top: 4px;">Differential Calculus</p>
-                <p class="text-secondary" style="font-size: 0.75rem;">Author: Shanti Narayan / Lalji Prasad</p>
-              </div>
-              <div>
-                <span class="notice-tag academic" style="font-size: 0.65rem;">B.Sc Physics</span>
-                <p style="font-weight: 600; margin-top: 4px;">Concepts of Physics & Mechanics</p>
-                <p class="text-secondary" style="font-size: 0.75rem;">Author: H.C. Verma / D.S. Mathur</p>
-              </div>
-              <div>
-                <span class="notice-tag result" style="font-size: 0.65rem;">B.Com Core</span>
-                <p style="font-weight: 600; margin-top: 4px;">Corporate Accounting</p>
-                <p class="text-secondary" style="font-size: 0.75rem;">Author: S.P. Jain & K.L. Narang</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- FAQ Box -->
-          <div class="card">
-            <h3 class="section-title" style="margin-bottom: 12px;"><i data-lucide="help-circle"></i> Portal FAQ</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.8rem; line-height: 1.4;">
-              <div>
-                <strong>Q. Where are files saved?</strong>
-                <p class="text-secondary">Simulated TXT papers are downloaded to your standard downloads folder instantly.</p>
-              </div>
-              <div>
-                <strong>Q. How to upload new papers?</strong>
-                <p class="text-secondary">Click the "Submit a Paper" button in the PYQ section, fill the metadata form and upload!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  lucide.createIcons();
-}
-
-
 
 // Combined calculators dashboard view
 function initCalculatorsView(container) {
@@ -433,13 +313,20 @@ function initCalculatorsView(container) {
   const cgpaWrap = container.querySelector('#calcs-cgpa-wrapper');
   cgpaWrap.innerHTML = `
     <h3><i data-lucide="calculator" style="color: var(--primary);"></i> CGPA Cumulative Calculator</h3>
-    <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 16px;">Fill in SGPAs to compute grades:</p>
+    <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 16px;">Enter your SGPA and Credits for each semester to compute your cumulative CGPA.</p>
+    
+    <div style="display: flex; gap: 12px; padding: 0 12px 6px 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 8px; font-weight: 700; font-size: 0.8rem; color: var(--text-secondary);">
+      <span style="min-width: 100px;">Semester</span>
+      <span style="width: 90px; text-align: center;">SGPA</span>
+      <span style="width: 90px; text-align: center;">Credits</span>
+    </div>
+
     <div class="cgpa-semesters-list" id="tools-cgpa-rows"></div>
     <button class="primary-btn full-btn" id="tools-calculate-cgpa-btn">Compute CGPA</button>
     <div class="calc-result-box" id="tools-cgpa-result-box" style="margin-top: 16px;">
-      <span class="calc-result-title">CGPA Result</span>
+      <span class="calc-result-title">Cumulative CGPA</span>
       <span class="calc-result-value" id="tools-cgpa-result-val">0.00</span>
-      <span class="calc-result-helper" id="tools-cgpa-result-helper">Enter semester values.</span>
+      <span class="calc-result-helper" id="tools-cgpa-result-helper">Enter semester details to compute.</span>
     </div>
   `;
 
@@ -451,10 +338,12 @@ function initCalculatorsView(container) {
   let html = '';
   for (let sem = 1; sem <= 6; sem++) {
     const val = savedSgpa[`sem_${sem}`] || '';
+    const credits = savedSgpa[`credits_${sem}`] || '20'; // Default to 20 credits as per Jharkhand regulation
     html += `
       <div class="cgpa-sem-row">
         <span class="cgpa-sem-label">Semester ${sem}</span>
         <input type="number" step="0.01" min="0" max="10" placeholder="SGPA" class="tools-cgpa-input" data-sem="${sem}" value="${val}">
+        <input type="number" step="1" min="1" max="50" placeholder="Credits" class="tools-cgpa-credit" data-sem="${sem}" value="${credits}">
       </div>
     `;
   }
@@ -463,16 +352,40 @@ function initCalculatorsView(container) {
   // Bind CGPA button
   container.querySelector('#tools-calculate-cgpa-btn').addEventListener('click', () => {
     const fields = container.querySelectorAll('.tools-cgpa-input');
-    let sum = 0, count = 0;
-    const currentSgpas = {};
+    let sumWeightedPoints = 0;
+    let sumCredits = 0;
+    let count = 0;
+    const currentSgpas = JSON.parse(localStorage.getItem('tata_sgpas')) || {};
 
     fields.forEach(field => {
       const sem = field.getAttribute('data-sem');
-      const val = parseFloat(field.value);
-      if (!isNaN(val) && val > 0) {
-        sum += val;
+      const sgpaVal = parseFloat(field.value);
+      
+      // Get the corresponding credit input
+      const creditField = container.querySelector(`.tools-cgpa-credit[data-sem="${sem}"]`);
+      const creditVal = creditField ? parseFloat(creditField.value) : 20;
+
+      if (!isNaN(sgpaVal) && sgpaVal > 0) {
+        if (sgpaVal > 10) {
+          showToast(`SGPA for Semester ${sem} cannot exceed 10.0`, 'warning');
+          return;
+        }
+        if (isNaN(creditVal) || creditVal <= 0) {
+          showToast(`Credits for Semester ${sem} must be a positive number`, 'warning');
+          return;
+        }
+
+        sumWeightedPoints += sgpaVal * creditVal;
+        sumCredits += creditVal;
         count++;
-        currentSgpas[`sem_${sem}`] = val;
+
+        currentSgpas[`sem_${sem}`] = sgpaVal;
+        currentSgpas[`credits_${sem}`] = creditVal;
+      } else {
+        delete currentSgpas[`sem_${sem}`];
+        if (creditField && !isNaN(creditVal)) {
+          currentSgpas[`credits_${sem}`] = creditVal;
+        }
       }
     });
 
@@ -482,12 +395,24 @@ function initCalculatorsView(container) {
 
     if (count === 0) {
       valEl.textContent = "0.00";
-      helperEl.textContent = "Please enter SGPA value in fields.";
+      helperEl.textContent = "Please enter SGPA in at least one semester.";
       return;
     }
-    const cgpa = sum / count;
+    const cgpa = sumWeightedPoints / sumCredits;
     valEl.textContent = cgpa.toFixed(2);
-    helperEl.textContent = `Completed calculation across ${count} semesters.`;
+
+    // Map to Grades and Classes as per Table No. 7 Jharkhand FYUGP NEP Regulations
+    let gradeLetter = 'F';
+    let desc = 'Fail';
+    if (cgpa >= 9.0) { gradeLetter = 'O (Outstanding)'; desc = 'First Class with Distinction'; }
+    else if (cgpa >= 8.0) { gradeLetter = 'A+ (Excellent)'; desc = 'First Class with Distinction'; }
+    else if (cgpa >= 7.0) { gradeLetter = 'A (Very Good)'; desc = 'First Class'; }
+    else if (cgpa >= 6.0) { gradeLetter = 'B+ (Good)'; desc = 'First Class / Good'; }
+    else if (cgpa >= 5.0) { gradeLetter = 'B (Above Average)'; desc = 'Second Class'; }
+    else if (cgpa >= 4.5) { gradeLetter = 'C (Average)'; desc = 'Second Class'; }
+    else if (cgpa >= 4.0) { gradeLetter = 'P (Pass)'; desc = 'Second Class / Pass'; }
+
+    helperEl.textContent = `Overall Grade: ${gradeLetter}. ${desc} (${count} Semesters, Total Credits: ${sumCredits}).`;
     showToast(`CGPA computed: ${cgpa.toFixed(2)}`, 'success');
   });
 }
