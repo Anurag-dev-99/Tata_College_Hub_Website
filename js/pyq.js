@@ -25,11 +25,7 @@ const categorySubjects = {
   'AEC': ['English Communication', 'Hindi Communication', 'Cyber Defense', 'Labour & Social Welfare']
 };
 
-// Generic subject breakdown table list (matches mockup dashboard cells)
-const generalSubjectsBreakdown = [
-  'Calculus', 'Algebra', 'Physics Mech.', 'Chemistry', 'Zoology',
-  'Botany', 'Labour & Social Welfare', 'C-Commerce (F.O.E.)'
-];
+
 
 export async function initPyqView(container, queryParams = {}) {
   // Fetch actual JSON data
@@ -157,13 +153,7 @@ function renderMainLayout(container) {
               <!-- Rendered dynamically -->
             </div>
 
-            <!-- Subject Breakdown cell list -->
-            <div class="card subject-breakdown-card">
-              <h4 class="section-title" style="font-size: 0.95rem;"><i data-lucide="grid"></i> Subject Breakdown</h4>
-              <div class="subject-breakdown-grid" id="subject-breakdown-grid-wrapper">
-                <!-- Rendered dynamically -->
-              </div>
-            </div>
+
 
           </div>
         </div>
@@ -232,8 +222,6 @@ function renderMainLayout(container) {
   renderSubjectsList();
   renderSemestersList();
   renderPapersList();
-  renderBreakdownGrid();
-
   // Control mobile panels visibility based on mobileStep
   applyResponsiveStepClasses();
 
@@ -424,15 +412,7 @@ function renderPapersList() {
   });
 }
 
-function renderBreakdownGrid() {
-  const container = document.getElementById('subject-breakdown-grid-wrapper');
-  if (!container) return;
 
-  // Render typical subjects breakdown list
-  container.innerHTML = generalSubjectsBreakdown.map(subj => `
-    <div class="subject-breakdown-cell">${subj}</div>
-  `).join('');
-}
 
 function togglePaperBookmark(paperId) {
   const paper = pyqData.find(p => p.id === paperId);
