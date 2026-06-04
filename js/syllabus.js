@@ -125,6 +125,8 @@ function renderMainLayout(container) {
                 <button class="pyq-sem-tab ${activeSemester === 4 ? 'active' : ''}" data-sem="4">Sem 4</button>
                 <button class="pyq-sem-tab ${activeSemester === 5 ? 'active' : ''}" data-sem="5">Sem 5</button>
                 <button class="pyq-sem-tab ${activeSemester === 6 ? 'active' : ''}" data-sem="6">Sem 6</button>
+                <button class="pyq-sem-tab ${activeSemester === 7 ? 'active' : ''}" data-sem="7">Sem 7</button>
+                <button class="pyq-sem-tab ${activeSemester === 8 ? 'active' : ''}" data-sem="8">Sem 8</button>
               </div>
 
               <!-- Active Semester Module Box -->
@@ -244,7 +246,7 @@ function renderSemestersList() {
 
   titleEl.textContent = `${activeSubject.toUpperCase()} SEMESTERS`;
 
-  container.innerHTML = [1, 2, 3, 4, 5, 6].map(sem => `
+  container.innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(sem => `
     <button class="pyq-cat-btn ${activeSemester === sem ? 'active' : ''}" data-sem="${sem}" style="justify-content: space-between;">
       <div style="display: flex; align-items: center; gap: 12px;">
         <i data-lucide="calendar"></i>
@@ -319,7 +321,9 @@ function renderSyllabusDetails() {
     activeModuleBox.style.display = 'block';
   }
 
-  const hasRealPdf = (syl.id === 'syl-math-ug' || syl.id === 'syl-math-minor') && activeSemester >= 1 && activeSemester <= 6;
+  const isMathPdf = (syl.id === 'syl-math-ug' || syl.id === 'syl-math-minor') && activeSemester >= 1 && activeSemester <= 6;
+  const isPhyPdf = (syl.id === 'syl-phy-ug' || syl.id === 'syl-phy-minor') && activeSemester >= 1 && activeSemester <= 8;
+  const hasRealPdf = isMathPdf || isPhyPdf;
   const btnText = hasRealPdf ? `Download Sem ${activeSemester} PDF` : 'Download Syllabus Outline';
 
   container.innerHTML = `
@@ -451,6 +455,34 @@ function handleSyllabusDownload(syl) {
     a.click();
     document.body.removeChild(a);
     showToast(`Downloading: Semester ${activeSemester} Mathematics Minor Syllabus PDF`, 'success');
+    return;
+  }
+
+  // Trigger real file download for Physics Major
+  if (syl.id === 'syl-phy-ug' && activeSemester >= 1 && activeSemester <= 8) {
+    const filename = `physics_sem${activeSemester}_syllabus.pdf`;
+    const path = `pdf/${filename}`;
+    const a = document.createElement('a');
+    a.href = path;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast(`Downloading: Semester ${activeSemester} Physics Syllabus PDF`, 'success');
+    return;
+  }
+
+  // Trigger real file download for Physics Minor
+  if (syl.id === 'syl-phy-minor' && activeSemester >= 1 && activeSemester <= 8) {
+    const filename = `physics_minor_sem${activeSemester}_syllabus.pdf`;
+    const path = `pdf/${filename}`;
+    const a = document.createElement('a');
+    a.href = path;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast(`Downloading: Semester ${activeSemester} Physics Minor Syllabus PDF`, 'success');
     return;
   }
 
