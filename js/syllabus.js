@@ -319,6 +319,9 @@ function renderSyllabusDetails() {
     activeModuleBox.style.display = 'block';
   }
 
+  const hasRealPdf = syl.id === 'syl-math-ug' && activeSemester >= 1 && activeSemester <= 6;
+  const btnText = hasRealPdf ? `Download Sem ${activeSemester} PDF` : 'Download Syllabus Outline';
+
   container.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 20px;">
       
@@ -334,7 +337,7 @@ function renderSyllabusDetails() {
         
         <div style="display: flex; gap: 12px; align-items: center;">
           <button class="primary-btn syl-download-trigger" data-id="${syl.id}">
-            <i data-lucide="download"></i> Download Entire PDF
+            <i data-lucide="download"></i> ${btnText}
           </button>
           <button class="secondary-btn btn-icon-only syl-save-trigger ${isSaved ? 'active' : ''}" data-id="${syl.id}" title="${isSaved ? 'Remove' : 'Save'}">
             <i data-lucide="bookmark" style="${isSaved ? 'fill: var(--primary); color: var(--primary);' : ''}"></i>
@@ -418,6 +421,20 @@ function toggleSyllabusBookmark(syl) {
 function handleSyllabusDownload(syl) {
   incrementGlobalDownloadCount();
   logRecentlyViewed(syl.id, syl.title, 'syllabus');
+
+  // Trigger real file download for Mathematics Major
+  if (syl.id === 'syl-math-ug' && activeSemester >= 1 && activeSemester <= 6) {
+    const filename = `math_sem${activeSemester}_syllabus.pdf`;
+    const path = `pdf/${filename}`;
+    const a = document.createElement('a');
+    a.href = path;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast(`Downloading: Semester ${activeSemester} Mathematics Syllabus PDF`, 'success');
+    return;
+  }
 
   // Trigger simulated file download
   const dummyContent = `TATA COLLEGE RESOURCE PORTAL\n===========================\nNEP FYUGP SYLLABUS\nSyllabus for: ${syl.title}\nDepartment: ${syl.department}\nEffective From: ${syl.effectiveFrom}\n\nSEMESTER PROGRESSIONS:\n` + syl.modules.join('\n') + `\n\n[End of File]`;
