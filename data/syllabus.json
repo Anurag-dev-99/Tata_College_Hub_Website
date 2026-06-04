@@ -13,7 +13,9 @@
       "Sem 3: MJ-3 (Abstract Algebra - I), MN-1 (Introductory Mathematics)",
       "Sem 4: MJ-4 (Differential Equations), MJ-5 (Numerical Methods)",
       "Sem 5: MJ-6 (Real Analysis - II), MJ-7 (Linear Algebra)",
-      "Sem 6: MJ-8 (Complex Analysis), MJ-9 (Metric Spaces)"
+      "Sem 6: MJ-8 (Complex Analysis), MJ-9 (Metric Spaces)",
+      "Sem 7: MJ-10 (Syllabus Outline Sem 7)",
+      "Sem 8: MJ-11 (Syllabus Outline Sem 8)"
     ]
   },
   {
@@ -107,7 +109,7 @@
     "id": "syl-math-minor",
     "title": "B.Sc Mathematics Minor Syllabus (FYUGP NEP-2020)",
     "department": "Mathematics Minor",
-    "semester": "All Semesters (1-6)",
+    "semester": "All Semesters (1-8)",
     "effectiveFrom": "2022 onwards",
     "fileSize": "1.8 MB",
     "description": "Four Year Undergraduate Program (FYUGP) Minor syllabus for Mathematics under NEP-2020. Spans topics for minor credit requirements, designed for students majoring in Physics, Chemistry, etc.",
@@ -117,7 +119,9 @@
       "Sem 3: MN-3 (Ordinary Differential Equations)",
       "Sem 4: MN-4 (Advanced Mathematics & Linear Algebra)",
       "Sem 5: MN-5 (Complex Variables & Numerical Methods)",
-      "Sem 6: MN-6 (Probability & Mathematical Statistics)"
+      "Sem 6: MN-6 (Probability & Mathematical Statistics)",
+      "Sem 7: MN-7 (Syllabus Outline Sem 7)",
+      "Sem 8: MN-8 (Syllabus Outline Sem 8)"
     ]
   },
   {

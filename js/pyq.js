@@ -33,15 +33,6 @@ const pyqFolderLinks = {
   }
 };
 
-function getGoogleDriveEmbedUrl(url) {
-  if (!url) return null;
-  const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (match && match[1]) {
-    return `https://drive.google.com/file/d/${match[1]}/preview`;
-  }
-  return null;
-}
-
 
 
 
@@ -421,14 +412,11 @@ function renderPapersList() {
         </div>
         
         <div class="pyq-paper-actions">
-          <span class="pyq-preview-link preview-paper-trigger" data-id="${paper.id}">
-            Preview <i data-lucide="external-link"></i>
-          </span>
           <button class="pyq-bookmark-btn save-paper-trigger ${isSaved ? 'active' : ''}" data-id="${paper.id}" title="${isSaved ? 'Remove' : 'Save'}">
             <i data-lucide="bookmark" style="${isSaved ? 'fill: var(--primary); color: var(--primary);' : ''}"></i>
           </button>
           <button class="primary-btn dl-paper-trigger" data-id="${paper.id}" style="padding: 6px 14px; font-size: 0.8rem; border-radius: var(--radius-sm);">
-            ${paper.downloadUrl ? 'Open Link' : 'Download PDF'}
+            ${paper.downloadUrl ? 'View PDF' : 'Download PDF'}
           </button>
         </div>
       </div>
@@ -437,15 +425,6 @@ function renderPapersList() {
 
   container.innerHTML = listHtml;
   lucide.createIcons();
-
-  // Attach card element event list
-  container.querySelectorAll('.preview-paper-trigger').forEach(el => {
-    el.addEventListener('click', () => {
-      const paperId = el.getAttribute('data-id');
-      const paper = pyqData.find(p => p.id === paperId);
-      if (paper) openPaperDetailsModal(paper);
-    });
-  });
 
   container.querySelectorAll('.save-paper-trigger').forEach(el => {
     el.addEventListener('click', () => {
@@ -524,64 +503,7 @@ function handlePaperDownload(paperId) {
   showToast(`Downloading: ${paper.subject} Exam Paper`, 'success');
 }
 
-function openPaperDetailsModal(paper) {
-  const modal = document.getElementById('universal-modal');
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
-
-  if (!modal || !title || !body) return;
-
-  logRecentlyViewed(paper.id, `${paper.subject} Sem ${paper.semester} (${paper.year})`, 'pyq');
-
-  title.textContent = paper.title;
-
-  const embedUrl = getGoogleDriveEmbedUrl(paper.downloadUrl);
-  let previewHtml = '';
-  if (embedUrl) {
-    previewHtml = `
-      <div style="height: 400px; background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; position: relative; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);">
-        <iframe src="${embedUrl}" width="100%" height="100%" style="border: none;" allow="autoplay"></iframe>
-      </div>
-    `;
-  } else {
-    previewHtml = `
-      <!-- Preview container -->
-      <div style="height: 250px; background: rgba(0,0,0,0.3); border: 2px dashed var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 20px;">
-        <i data-lucide="file-text" style="width: 42px; height: 42px; color: var(--primary);"></i>
-        <h4 style="font-weight: 700; font-size: 0.95rem;">Document Preview Simulator</h4>
-        <p class="text-secondary" style="font-size: 0.78rem; max-width: 320px;">Full examination paper files are simulated for this web prototype. Tap download below to save the text sheet.</p>
-      </div>
-    `;
-  }
-
-  body.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 16px;">
-      <div style="background: var(--bg-card); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; border-left: 4px solid var(--primary);">
-        <p><strong>Subject:</strong> ${paper.subject} | <strong>Category:</strong> ${paper.category}</p>
-        <p><strong>Semester:</strong> ${paper.semester} | <strong>File Size:</strong> ${paper.fileSize}</p>
-      </div>
-
-      ${previewHtml}
-
-      <div style="display: flex; gap: 12px; justify-content: flex-end;">
-        <button class="secondary-btn" id="close-pyq-preview-modal-btn">Close Preview</button>
-        <button class="primary-btn" id="pyq-modal-download-btn">${paper.downloadUrl ? 'Open Link' : 'Download PDF'}</button>
-      </div>
-    </div>
-  `;
-
-  lucide.createIcons();
-  modal.classList.remove('hidden');
-
-  document.getElementById('close-pyq-preview-modal-btn').addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
-
-  document.getElementById('pyq-modal-download-btn').addEventListener('click', () => {
-    modal.classList.add('hidden');
-    handlePaperDownload(paper.id);
-  });
-}
+// Details modal removed because users download directly
 
 // Controller to hide/show panels in Mobile view based on active step
 function applyResponsiveStepClasses() {

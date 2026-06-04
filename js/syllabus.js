@@ -118,15 +118,8 @@ function renderMainLayout(container) {
               <p class="text-secondary" style="font-size: 0.82rem;" id="syl-active-subheader">Syllabus outline and curriculum structure.</p>
               
               <!-- Desktop Semester Navigation Tabs -->
-              <div class="pyq-sem-tabs" style="margin-top: 16px;">
-                <button class="pyq-sem-tab ${activeSemester === 1 ? 'active' : ''}" data-sem="1">Sem 1</button>
-                <button class="pyq-sem-tab ${activeSemester === 2 ? 'active' : ''}" data-sem="2">Sem 2</button>
-                <button class="pyq-sem-tab ${activeSemester === 3 ? 'active' : ''}" data-sem="3">Sem 3</button>
-                <button class="pyq-sem-tab ${activeSemester === 4 ? 'active' : ''}" data-sem="4">Sem 4</button>
-                <button class="pyq-sem-tab ${activeSemester === 5 ? 'active' : ''}" data-sem="5">Sem 5</button>
-                <button class="pyq-sem-tab ${activeSemester === 6 ? 'active' : ''}" data-sem="6">Sem 6</button>
-                <button class="pyq-sem-tab ${activeSemester === 7 ? 'active' : ''}" data-sem="7">Sem 7</button>
-                <button class="pyq-sem-tab ${activeSemester === 8 ? 'active' : ''}" data-sem="8">Sem 8</button>
+              <div class="pyq-sem-tabs" id="syl-desktop-tabs-container" style="margin-top: 16px;">
+                <!-- Rendered dynamically -->
               </div>
 
               <!-- Active Semester Module Box -->
@@ -244,9 +237,14 @@ function renderSemestersList() {
   const titleEl = document.getElementById('syl-semesters-list-title');
   if (!container) return;
 
+  const syl = getSyllabusDocument(activeCategory, activeSubject);
+  const totalSems = syl.modules ? syl.modules.length : 6;
+
   titleEl.textContent = `${activeSubject.toUpperCase()} SEMESTERS`;
 
-  container.innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(sem => `
+  const semsArray = Array.from({ length: totalSems }, (_, i) => i + 1);
+
+  container.innerHTML = semsArray.map(sem => `
     <button class="pyq-cat-btn ${activeSemester === sem ? 'active' : ''}" data-sem="${sem}" style="justify-content: space-between;">
       <div style="display: flex; align-items: center; gap: 12px;">
         <i data-lucide="calendar"></i>
@@ -293,12 +291,37 @@ function renderSyllabusDetails() {
 
   if (!container) return;
 
+  // Get matching syllabus document (real or dynamic)
+  const syl = getSyllabusDocument(activeCategory, activeSubject);
+
+  const totalSems = syl.modules ? syl.modules.length : 6;
+
+  // Make sure active semester doesn't exceed total semesters when switching subjects
+  if (activeSemester > totalSems) {
+    activeSemester = totalSems;
+  }
+
+  // Render desktop semester navigation tabs
+  const tabsContainer = document.getElementById('syl-desktop-tabs-container');
+  if (tabsContainer) {
+    let tabsHtml = '';
+    for (let sem = 1; sem <= totalSems; sem++) {
+      tabsHtml += `<button class="pyq-sem-tab ${activeSemester === sem ? 'active' : ''}" data-sem="${sem}">Sem ${sem}</button>`;
+    }
+    tabsContainer.innerHTML = tabsHtml;
+
+    // Re-bind listeners for horizontal tabs since they are replaced
+    tabsContainer.querySelectorAll('.pyq-sem-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        activeSemester = parseInt(tab.getAttribute('data-sem'));
+        renderSyllabusDetails();
+      });
+    });
+  }
+
   // Update header text
   headerEl.textContent = `${activeSubject.toUpperCase()} (${activeCategory}) > SEMESTER ${activeSemester}`;
   subheaderEl.textContent = `NEP curriculum outline and course progression for Semester ${activeSemester}.`;
-
-  // Get matching syllabus document (real or dynamic)
-  const syl = getSyllabusDocument(activeCategory, activeSubject);
 
   const savedSyllabus = JSON.parse(localStorage.getItem('tata_saved_syllabus')) || [];
   const isSaved = savedSyllabus.some(item => item.id === syl.id);
@@ -321,7 +344,7 @@ function renderSyllabusDetails() {
     activeModuleBox.style.display = 'block';
   }
 
-  const isMathPdf = (syl.id === 'syl-math-ug' || syl.id === 'syl-math-minor') && activeSemester >= 1 && activeSemester <= 6;
+  const isMathPdf = (syl.id === 'syl-math-ug' || syl.id === 'syl-math-minor') && activeSemester >= 1 && activeSemester <= 8;
   const isPhyPdf = (syl.id === 'syl-phy-ug' || syl.id === 'syl-phy-minor') && activeSemester >= 1 && activeSemester <= 8;
   const hasRealPdf = isMathPdf || isPhyPdf;
   const btnText = hasRealPdf ? `Download Sem ${activeSemester} PDF` : 'Download Syllabus Outline';
@@ -431,7 +454,7 @@ function handleSyllabusDownload(syl) {
   logRecentlyViewed(syl.id, syl.title, 'syllabus');
 
   // Trigger real file download for Mathematics Major
-  if (syl.id === 'syl-math-ug' && activeSemester >= 1 && activeSemester <= 6) {
+  if (syl.id === 'syl-math-ug' && activeSemester >= 1 && activeSemester <= 8) {
     const filename = `math_sem${activeSemester}_syllabus.pdf`;
     const path = `pdf/${filename}`;
     const a = document.createElement('a');
@@ -445,7 +468,7 @@ function handleSyllabusDownload(syl) {
   }
 
   // Trigger real file download for Mathematics Minor
-  if (syl.id === 'syl-math-minor' && activeSemester >= 1 && activeSemester <= 6) {
+  if (syl.id === 'syl-math-minor' && activeSemester >= 1 && activeSemester <= 8) {
     const filename = `math_minor_sem${activeSemester}_syllabus.pdf`;
     const path = `pdf/${filename}`;
     const a = document.createElement('a');
@@ -629,18 +652,7 @@ function setupLayoutListeners(container) {
     });
   });
 
-  // 2. Desktop Semester Navigation Tabs
-  container.querySelectorAll('.pyq-sem-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      activeSemester = parseInt(tab.getAttribute('data-sem'));
-
-      // Highlight active tab
-      container.querySelectorAll('.pyq-sem-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      renderSyllabusDetails();
-    });
-  });
+  // Horizontal tabs are re-bound dynamically in renderSyllabusDetails
 
   // 3. Mobile Back Navigation Button Click
   const backBtn = container.querySelector('#syl-back-btn');
