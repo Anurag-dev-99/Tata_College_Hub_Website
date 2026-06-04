@@ -100,5 +100,22 @@
       "Sem 5: MJ-6 (International Relations), MJ-7 (Western Political Thought)",
       "Sem 6: MJ-8 (Indian Political Thought), MJ-9 (Public Policy in India)"
     ]
+  },
+  {
+    "id": "syl-math-minor",
+    "title": "B.Sc Mathematics Minor Syllabus (FYUGP NEP-2020)",
+    "department": "Mathematics Minor",
+    "semester": "All Semesters (1-6)",
+    "effectiveFrom": "2022 onwards",
+    "fileSize": "1.8 MB",
+    "description": "Four Year Undergraduate Program (FYUGP) Minor syllabus for Mathematics under NEP-2020. Spans topics for minor credit requirements, designed for students majoring in Physics, Chemistry, etc.",
+    "modules": [
+      "Sem 1: MN-1 (Introductory Mathematics / Calculus)",
+      "Sem 2: MN-2 (Real Analysis & Algebra)",
+      "Sem 3: MN-3 (Ordinary Differential Equations)",
+      "Sem 4: MN-4 (Advanced Mathematics & Linear Algebra)",
+      "Sem 5: MN-5 (Complex Variables & Numerical Methods)",
+      "Sem 6: MN-6 (Probability & Mathematical Statistics)"
+    ]
   }
 ]

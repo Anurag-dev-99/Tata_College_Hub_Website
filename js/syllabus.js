@@ -319,7 +319,7 @@ function renderSyllabusDetails() {
     activeModuleBox.style.display = 'block';
   }
 
-  const hasRealPdf = syl.id === 'syl-math-ug' && activeSemester >= 1 && activeSemester <= 6;
+  const hasRealPdf = (syl.id === 'syl-math-ug' || syl.id === 'syl-math-minor') && activeSemester >= 1 && activeSemester <= 6;
   const btnText = hasRealPdf ? `Download Sem ${activeSemester} PDF` : 'Download Syllabus Outline';
 
   container.innerHTML = `
@@ -362,12 +362,16 @@ function renderSyllabusDetails() {
 
 function getSyllabusDocument(category, subject) {
   const normalizedSub = subject.toLowerCase();
+  const normalizedCat = category.toLowerCase();
   
   // Search in static loaded list
   const match = syllabusData.find(s => {
     const titleL = s.title.toLowerCase();
     const deptL = s.department.toLowerCase();
-    return titleL.includes(normalizedSub) || deptL.includes(normalizedSub);
+    if (normalizedCat === 'minor') {
+      return (titleL.includes(normalizedSub) || deptL.includes(normalizedSub)) && (titleL.includes('minor') || deptL.includes('minor'));
+    }
+    return (titleL.includes(normalizedSub) || deptL.includes(normalizedSub)) && !titleL.includes('minor') && !deptL.includes('minor');
   });
 
   if (match) {
@@ -433,6 +437,20 @@ function handleSyllabusDownload(syl) {
     a.click();
     document.body.removeChild(a);
     showToast(`Downloading: Semester ${activeSemester} Mathematics Syllabus PDF`, 'success');
+    return;
+  }
+
+  // Trigger real file download for Mathematics Minor
+  if (syl.id === 'syl-math-minor' && activeSemester >= 1 && activeSemester <= 6) {
+    const filename = `math_minor_sem${activeSemester}_syllabus.pdf`;
+    const path = `pdf/${filename}`;
+    const a = document.createElement('a');
+    a.href = path;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast(`Downloading: Semester ${activeSemester} Mathematics Minor Syllabus PDF`, 'success');
     return;
   }
 
