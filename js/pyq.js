@@ -25,6 +25,24 @@ const categorySubjects = {
   'AEC': ['English Communication', 'Hindi Communication', 'Cyber Defense', 'Labour & Social Welfare']
 };
 
+const pyqFolderLinks = {
+  'Major': {
+    'Mathematics': {
+      4: 'https://drive.google.com/drive/folders/19CrozvOQtzt_QOC164YWAhAnAxSXY13Z?usp=sharing'
+    }
+  }
+};
+
+function getGoogleDriveEmbedUrl(url) {
+  if (!url) return null;
+  const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://drive.google.com/file/d/${match[1]}/preview`;
+  }
+  return null;
+}
+
+
 
 
 export async function initPyqView(container, queryParams = {}) {
@@ -338,21 +356,52 @@ function renderPapersList() {
     p.semester === activeSemester
   );
 
-  if (papers.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
-        <i data-lucide="alert-circle" style="width: 32px; height: 32px; color: var(--text-secondary); margin-bottom: 8px;"></i>
-        <p class="text-secondary" style="font-size: 0.85rem; font-weight: 600;">No papers found for Sem ${activeSemester}</p>
-        <p class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">Be the first to upload one for your department!</p>
+  const folderLink = pyqFolderLinks[activeCategory]?.[activeSubject]?.[activeSemester];
+  let folderCardHtml = '';
+  if (folderLink) {
+    folderCardHtml = `
+      <div class="card pyq-folder-card" style="padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(76, 201, 240, 0.12) 100%); border: 1px solid rgba(67, 97, 238, 0.25); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; gap: 12px; text-align: left;">
+          <div style="background: var(--primary); color: white; width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i data-lucide="folder-open" style="width: 18px; height: 18px;"></i>
+          </div>
+          <div>
+            <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px;">Google Drive Folder</h4>
+            <p class="text-secondary" style="font-size: 0.75rem;">Access all Semester ${activeSemester} ${activeSubject} ${activeCategory} files directly.</p>
+          </div>
+        </div>
+        <a href="${folderLink}" target="_blank" class="primary-btn" style="padding: 6px 12px; font-size: 0.78rem; text-decoration: none; display: flex; align-items: center; gap: 6px; border-radius: var(--radius-sm); line-height: 1;">
+          Open Folder <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+        </a>
       </div>
     `;
+  }
+
+  if (papers.length === 0) {
+    if (folderLink) {
+      container.innerHTML = folderCardHtml + `
+        <div style="text-align: center; padding: 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+          <i data-lucide="alert-circle" style="width: 32px; height: 32px; color: var(--text-secondary); margin-bottom: 8px;"></i>
+          <p class="text-secondary" style="font-size: 0.85rem; font-weight: 600;">No individual papers linked here yet</p>
+          <p class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">Use the Google Drive folder link above to browse files.</p>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+          <i data-lucide="alert-circle" style="width: 32px; height: 32px; color: var(--text-secondary); margin-bottom: 8px;"></i>
+          <p class="text-secondary" style="font-size: 0.85rem; font-weight: 600;">No papers found for Sem ${activeSemester}</p>
+          <p class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">Be the first to upload one for your department!</p>
+        </div>
+      `;
+    }
     lucide.createIcons();
     return;
   }
 
   const savedPyqs = JSON.parse(localStorage.getItem('tata_saved_pyqs')) || [];
 
-  container.innerHTML = papers.map(paper => {
+  let listHtml = folderCardHtml + papers.map(paper => {
     const isSaved = savedPyqs.some(item => item.id === paper.id);
     const downloads = localStorage.getItem(`tata_dl_count_${paper.id}`) || paper.downloadCount;
     
@@ -379,13 +428,14 @@ function renderPapersList() {
             <i data-lucide="bookmark" style="${isSaved ? 'fill: var(--primary); color: var(--primary);' : ''}"></i>
           </button>
           <button class="primary-btn dl-paper-trigger" data-id="${paper.id}" style="padding: 6px 14px; font-size: 0.8rem; border-radius: var(--radius-sm);">
-            Download PDF
+            ${paper.downloadUrl ? 'Open Link' : 'Download PDF'}
           </button>
         </div>
       </div>
     `;
   }).join('');
 
+  container.innerHTML = listHtml;
   lucide.createIcons();
 
   // Attach card element event list
@@ -453,6 +503,12 @@ function handlePaperDownload(paperId) {
   // Rerender list to show update counts
   renderPapersList();
 
+  if (paper.downloadUrl) {
+    window.open(paper.downloadUrl, '_blank');
+    showToast(`Opening: ${paper.title}`, 'success');
+    return;
+  }
+
   // Trigger simulated file download
   const dummyContent = `TATA COLLEGE PORTAL\nSubject: ${paper.subject}\nCategory: ${paper.category}\nSemester: ${paper.semester}\nYear: ${paper.year}\n\n[MOCK EXAMINATION FILE DOCUMENT]`;
   const blob = new Blob([dummyContent], { type: 'text/plain' });
@@ -478,6 +534,26 @@ function openPaperDetailsModal(paper) {
   logRecentlyViewed(paper.id, `${paper.subject} Sem ${paper.semester} (${paper.year})`, 'pyq');
 
   title.textContent = paper.title;
+
+  const embedUrl = getGoogleDriveEmbedUrl(paper.downloadUrl);
+  let previewHtml = '';
+  if (embedUrl) {
+    previewHtml = `
+      <div style="height: 400px; background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; position: relative; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);">
+        <iframe src="${embedUrl}" width="100%" height="100%" style="border: none;" allow="autoplay"></iframe>
+      </div>
+    `;
+  } else {
+    previewHtml = `
+      <!-- Preview container -->
+      <div style="height: 250px; background: rgba(0,0,0,0.3); border: 2px dashed var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 20px;">
+        <i data-lucide="file-text" style="width: 42px; height: 42px; color: var(--primary);"></i>
+        <h4 style="font-weight: 700; font-size: 0.95rem;">Document Preview Simulator</h4>
+        <p class="text-secondary" style="font-size: 0.78rem; max-width: 320px;">Full examination paper files are simulated for this web prototype. Tap download below to save the text sheet.</p>
+      </div>
+    `;
+  }
+
   body.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 16px;">
       <div style="background: var(--bg-card); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; border-left: 4px solid var(--primary);">
@@ -485,16 +561,11 @@ function openPaperDetailsModal(paper) {
         <p><strong>Semester:</strong> ${paper.semester} | <strong>File Size:</strong> ${paper.fileSize}</p>
       </div>
 
-      <!-- Preview container -->
-      <div style="height: 250px; background: rgba(0,0,0,0.3); border: 2px dashed var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 20px;">
-        <i data-lucide="file-text" style="width: 42px; height: 42px; color: var(--primary);"></i>
-        <h4 style="font-weight: 700; font-size: 0.95rem;">Document Preview Simulator</h4>
-        <p class="text-secondary" style="font-size: 0.78rem; max-width: 320px;">Full examination paper files are simulated for this web prototype. Tap download below to save the text sheet.</p>
-      </div>
+      ${previewHtml}
 
       <div style="display: flex; gap: 12px; justify-content: flex-end;">
         <button class="secondary-btn" id="close-pyq-preview-modal-btn">Close Preview</button>
-        <button class="primary-btn" id="pyq-modal-download-btn">Download PDF</button>
+        <button class="primary-btn" id="pyq-modal-download-btn">${paper.downloadUrl ? 'Open Link' : 'Download PDF'}</button>
       </div>
     </div>
   `;
