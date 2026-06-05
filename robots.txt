@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /pdf/
+Disallow: /data/
+
+# Block common bot crawlers that don't respect robots.txt anyway
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+Sitemap: https://anurag-dev-99.github.io/Tata_College_Hub_Website/sitemap.xml

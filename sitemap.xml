@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage / Dashboard -->
+  <url>
+    <loc>https://anurag-dev-99.github.io/Tata_College_Hub_Website/</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- PYQ Papers Section -->
+  <url>
+    <loc>https://anurag-dev-99.github.io/Tata_College_Hub_Website/#pyqs</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Syllabus Explorer -->
+  <url>
+    <loc>https://anurag-dev-99.github.io/Tata_College_Hub_Website/#syllabus</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Notice Board -->
+  <url>
+    <loc>https://anurag-dev-99.github.io/Tata_College_Hub_Website/#notices</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Results & Analysis -->
+  <url>
+    <loc>https://anurag-dev-99.github.io/Tata_College_Hub_Website/#results</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- CGPA Calculator -->
+  <url>
+    <loc>https://anurag-dev-99.github.io/Tata_College_Hub_Website/#calculators</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
