@@ -28,6 +28,7 @@ const categorySubjects = {
 const pyqFolderLinks = {
   'Major': {
     'Mathematics': {
+      3: 'https://drive.google.com/drive/folders/1fTd2QZqbJNqS0y4cMwBafFBZwc_wiNne?usp=sharing',
       4: 'https://drive.google.com/drive/folders/19CrozvOQtzt_QOC164YWAhAnAxSXY13Z?usp=sharing'
     }
   }
