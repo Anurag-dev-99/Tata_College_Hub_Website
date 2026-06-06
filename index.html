@@ -164,12 +164,18 @@
         </div>
 
         <div class="search-container">
-          <i data-lucide="search" class="search-icon"></i>
+          <button class="search-back-btn" id="search-back-btn" aria-label="Close Search" style="display: none;">
+            <i data-lucide="arrow-left"></i>
+          </button>
+          <i data-lucide="search" class="search-icon" id="search-input-icon"></i>
           <input type="text" id="global-search-input" placeholder="Search PYQs, syllabus, notices..." aria-label="Search everywhere">
           <div id="search-dropdown" class="search-dropdown-results hidden"></div>
         </div>
 
         <div class="top-bar-actions">
+          <button class="icon-action-btn" id="mobile-search-btn" title="Search" aria-label="Open Search">
+            <i data-lucide="search"></i>
+          </button>
           <button class="icon-action-btn" id="pwa-install-btn" title="Install App" style="display: none;">
             <i data-lucide="download-cloud"></i>
             <span class="btn-tooltip">Install App</span>

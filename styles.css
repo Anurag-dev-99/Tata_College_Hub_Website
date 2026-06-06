@@ -307,6 +307,14 @@ button, input, select, textarea {
   width: 420px;
 }
 
+#mobile-search-btn {
+  display: none;
+}
+
+.search-back-btn {
+  display: none;
+}
+
 .search-icon {
   position: absolute;
   left: 16px;
@@ -1484,6 +1492,15 @@ button, input, select, textarea {
   .top-bar {
     padding: 0 20px;
   }
+
+  .top-bar.search-active {
+    padding: 0 16px;
+  }
+
+  .top-bar.search-active .mobile-logo-header,
+  .top-bar.search-active .top-bar-actions {
+    display: none !important;
+  }
   
   .mobile-logo-header {
     display: flex;
@@ -1503,6 +1520,58 @@ button, input, select, textarea {
   
   .search-container {
     display: none; /* Hide default topbar search on mobile */
+  }
+
+  .top-bar.search-active .search-container {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .top-bar.search-active .search-back-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+  }
+
+  .top-bar.search-active .search-back-btn:hover {
+    background: var(--bg-card);
+  }
+
+  .top-bar.search-active #search-input-icon {
+    display: none !important;
+  }
+
+  .top-bar.search-active #global-search-input {
+    padding-left: 16px !important;
+    width: 100% !important;
+  }
+
+  .top-bar.search-active .search-dropdown-results {
+    position: fixed;
+    top: 75px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 75px);
+    max-height: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    background: var(--bg-app);
+  }
+
+  #mobile-search-btn {
+    display: flex;
   }
   
   .student-profile {
@@ -1533,9 +1602,16 @@ button, input, select, textarea {
   .tools-grid {
     grid-template-columns: 1fr;
   }
+
+  .toast-container {
+    bottom: 80px;
+    right: 16px;
+    left: 16px;
+    max-width: calc(100% - 32px);
+  }
   
   .back-to-top-btn {
-    bottom: 80px; /* Offset higher for mobile nav clearance */
+    bottom: 150px; /* Offset higher for mobile nav and toast clearance */
   }
 }
 

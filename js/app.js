@@ -534,8 +534,27 @@ function initDepartmentsView(container, params) {
 function initGlobalSearch() {
   const searchInput = document.getElementById('global-search-input');
   const dropdown = document.getElementById('search-dropdown');
+  const mobileSearchBtn = document.getElementById('mobile-search-btn');
+  const searchBackBtn = document.getElementById('search-back-btn');
+  const topBar = document.querySelector('.top-bar');
 
   if (!searchInput || !dropdown) return;
+
+  if (mobileSearchBtn && topBar) {
+    mobileSearchBtn.addEventListener('click', () => {
+      topBar.classList.add('search-active');
+      setTimeout(() => searchInput.focus(), 50);
+    });
+  }
+
+  if (searchBackBtn && topBar) {
+    searchBackBtn.addEventListener('click', () => {
+      topBar.classList.remove('search-active');
+      searchInput.value = '';
+      dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+    });
+  }
 
   searchInput.addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase().trim();
@@ -612,6 +631,9 @@ function initGlobalSearch() {
 
         dropdown.classList.add('hidden');
         searchInput.value = '';
+        if (topBar) {
+          topBar.classList.remove('search-active');
+        }
 
         if (action === 'pyq') {
           window.location.hash = `#pyqs`;
@@ -631,8 +653,11 @@ function initGlobalSearch() {
 
   // Hide search dropdown on click outside
   document.addEventListener('click', (e) => {
-    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+    if (!searchInput.contains(e.target) && !dropdown.contains(e.target) && (!mobileSearchBtn || !mobileSearchBtn.contains(e.target))) {
       dropdown.classList.add('hidden');
+      if (topBar && window.innerWidth <= 768) {
+        topBar.classList.remove('search-active');
+      }
     }
   });
 }
