@@ -73,6 +73,9 @@ async function initApp() {
   const activeNoticesCount = appState.notices.filter(n => !n.isArchived).length;
   const countBadge = document.getElementById('notices-count-badge');
   if (countBadge) countBadge.textContent = activeNoticesCount;
+
+  // Initialize any static Lucide icons (e.g. search icons in top bar)
+  lucide.createIcons();
 }
 
 // Service Worker Registration

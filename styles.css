@@ -1997,14 +1997,72 @@ button, input, select, textarea {
   }
   
   .pyq-paper-list-item {
-    padding: 12px 14px;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
     gap: 12px;
+  }
+
+  .pyq-paper-left {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pyq-paper-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pyq-paper-title {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-all;
   }
   
   .pyq-paper-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+
+  .pyq-paper-actions .primary-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .pyq-paper-actions .pyq-bookmark-btn {
+    flex: 0 0 auto;
+  }
+
+  /* Google Drive Folder card mobile optimization */
+  .pyq-folder-card {
     flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
+    align-items: stretch !important;
+    gap: 14px;
+    padding: 16px !important;
+  }
+
+  .pyq-folder-card > div {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .pyq-folder-card p {
+    white-space: normal;
+    font-size: 0.72rem !important;
+  }
+
+  .pyq-folder-card a {
+    width: 100%;
+    justify-content: center;
   }
 }
 
