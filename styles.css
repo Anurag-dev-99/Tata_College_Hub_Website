@@ -1597,14 +1597,28 @@ button, input, select, textarea {
     max-width: 100% !important;
   }
 
+  /* Override parent card overflow so tabs are not clipped */
+  #card-papers-list-sec > .card,
+  #syl-card-details-sec > .card {
+    overflow: visible !important;
+  }
+
   .pyq-sem-tabs {
     display: flex !important;
+    flex-wrap: wrap !important;
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    gap: 6px !important;
+  }
+
+  .pyq-sem-tab {
+    flex: 1 1 calc(25% - 6px) !important;
+    min-width: 0 !important;
+    padding: 8px 4px !important;
+    font-size: 0.8rem !important;
+    text-align: center !important;
   }
 
   .pyq-sem-tabs::-webkit-scrollbar {
