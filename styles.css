@@ -1419,13 +1419,14 @@ button, input, select, textarea {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 65px;
+  height: 60px;
   background-color: var(--bg-sidebar);
   border-top: 1px solid var(--border-color);
   justify-content: space-around;
   align-items: center;
   z-index: 95;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+  padding: 0 4px;
 }
 
 .mobile-nav-item {
@@ -1434,15 +1435,17 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
-  gap: 4px;
+  gap: 3px;
   transition: color var(--transition-fast);
+  padding: 4px 2px;
+  min-width: 0;
 }
 
 .mobile-nav-item i {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .mobile-nav-item.active {
@@ -1486,7 +1489,9 @@ button, input, select, textarea {
   
   .main-wrapper {
     margin-left: 0; /* Align wrapper fully left */
-    padding-bottom: 75px; /* spacer for mobile bottom nav */
+    padding-bottom: 80px; /* spacer for mobile bottom nav */
+    min-height: 0; /* Remove 100vh constraint so content can scroll freely */
+    height: auto;
   }
   
   .top-bar {
@@ -1588,6 +1593,9 @@ button, input, select, textarea {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden;
+    overflow-y: visible;
+    min-height: 0;
+    flex: none; /* Remove flex stretching so content flows naturally */
   }
   
   .pyq-panel,
