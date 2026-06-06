@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'tata-hub-v33';
+const CACHE_NAME = 'tata-hub-v34';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -16,7 +16,8 @@ const ASSETS_TO_CACHE = [
   './data/syllabus.json',
   './data/notices.json',
   './data/results.json',
-  './data/calendar.json'
+  './data/calendar.json',
+  './data/sem4_maths_results.json'
 ];
 
 // Install Event
