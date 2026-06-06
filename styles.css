@@ -1585,6 +1585,30 @@ button, input, select, textarea {
   
   .page-content {
     padding: 24px 16px;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+  }
+  
+  .pyq-panel,
+  .pyq-center-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .pyq-sem-tabs {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .pyq-sem-tabs::-webkit-scrollbar {
+    display: none !important;
   }
   
   .page-title {
