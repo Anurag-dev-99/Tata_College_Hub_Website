@@ -1,33 +1,108 @@
 /* ==========================================
    Tata College Student Hub - Results Module
-   Sem 4 Maths Major Result (2022-2026 Batch)
-   Search, Leaderboard, Head-to-Head Comparison
+   Supports Results Selection Hub & Specific Exam Results Dashboards
    ========================================== */
 
 import { showToast } from './app.js';
 
-// Global results data store
-let sem4MathsResults = [];
+// Module-level state variables
+let currentResultsDataset = [];
+let datasetsMetadata = [];
 let announcementsData = null;
 
-// Radar chart instance references (for cleanup)
+// Radar chart instance reference (for cleanup)
 let comparisonChart = null;
 
-export async function initResultsView(container) {
-  // Build the complete results page HTML
+/**
+ * Main Coordinator for Results View
+ * @param {HTMLElement} container - Page content mount element
+ * @param {Object} queryParams - Query parameters from SPA router
+ */
+export async function initResultsView(container, queryParams) {
+  // Load result dataset registry first
+  await loadResultsRegistry();
+
+  const examId = queryParams ? queryParams.exam : null;
+  const dataset = examId ? datasetsMetadata.find(d => d.id === examId) : null;
+
+  if (dataset) {
+    // Render specific exam search and stats dashboard
+    await renderExamDashboard(container, dataset);
+  } else {
+    // Render main Results Selection Hub landing page
+    renderResultsHub(container);
+  }
+}
+
+// ========== CONFIG & REGISTRY LOADING ==========
+
+async function loadResultsRegistry() {
+  if (!announcementsData || datasetsMetadata.length === 0) {
+    try {
+      const res = await fetch('data/results.json');
+      const data = await res.json();
+      announcementsData = data;
+      datasetsMetadata = data.datasets || [];
+    } catch (err) {
+      console.error("Error loading results config: ", err);
+      showToast("Failed to load results configuration.", "error");
+    }
+  }
+}
+
+// ========== VIEW RENDERING: RESULTS HUB ==========
+
+function renderResultsHub(container) {
+  // Build selections grid HTML
+  let cardsHtml = '';
+  if (datasetsMetadata.length === 0) {
+    cardsHtml = `
+      <div class="card" style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 40px;">
+        <i data-lucide="alert-circle" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px; margin: 0 auto 12px auto;"></i>
+        <p>No result dashboards are currently available.</p>
+      </div>
+    `;
+  } else {
+    cardsHtml = datasetsMetadata.map(d => `
+      <div class="results-card-select" data-exam="${d.id}">
+        <div class="results-card-header">
+          <div class="results-card-icon">
+            <i data-lucide="award"></i>
+          </div>
+          <span class="results-card-badge">${d.status}</span>
+        </div>
+        <h3 class="results-card-title">${d.title}</h3>
+        <p class="results-card-batch">${d.batch}</p>
+        <div class="results-card-meta">
+          <span><i data-lucide="calendar"></i> ${d.date}</span>
+          <span><i data-lucide="globe"></i> ${d.university}</span>
+        </div>
+        <div class="results-card-action-btn">
+          <span>Open Dashboard</span>
+          <i data-lucide="arrow-right"></i>
+        </div>
+      </div>
+    `).join('');
+  }
+
   container.innerHTML = `
     <div class="animated-slide-up">
       <div class="page-title-section">
         <div>
-          <h2 class="page-title">Results & Analysis</h2>
-          <p class="page-subtitle">Semester 4 — Mathematics Major — Batch 2022-2026 (Kolhan University)</p>
+          <h2 class="page-title">Results &amp; Analysis Hub</h2>
+          <p class="page-subtitle">Select an examination batch to search results and view dashboards.</p>
         </div>
       </div>
 
-      <!-- Announcements Table -->
+      <!-- Selection Cards Grid -->
+      <div class="results-hub-grid">
+        ${cardsHtml}
+      </div>
+
+      <!-- Declared Results & Alerts -->
       <div class="card" style="margin-bottom: 32px;">
         <h3 class="section-title" style="margin-bottom: 16px;">
-          <i data-lucide="award" style="color: var(--success);"></i> Declared Results & Alerts
+          <i data-lucide="bell" style="color: var(--success);"></i> Declared Results &amp; Alerts
         </h3>
         <div class="styled-table-wrapper" style="overflow-x: auto;">
           <table class="styled-table">
@@ -47,6 +122,58 @@ export async function initResultsView(container) {
           </table>
         </div>
       </div>
+    </div>
+  `;
+
+  // Render announcements table contents
+  renderAnnouncementsTable();
+
+  // Attach card click handlers to update the router hash
+  container.querySelectorAll('.results-card-select').forEach(card => {
+    card.addEventListener('click', () => {
+      const examId = card.getAttribute('data-exam');
+      window.location.hash = `#results?exam=${examId}`;
+    });
+  });
+
+  lucide.createIcons();
+}
+
+// ========== VIEW RENDERING: EXAM DASHBOARD ==========
+
+async function renderExamDashboard(container, dataset) {
+  // Load specific exam marks dataset dynamically
+  try {
+    const res = await fetch(`data/${dataset.file}`);
+    currentResultsDataset = await res.json();
+  } catch (err) {
+    console.error("Error loading results file: ", err);
+    showToast("Failed to load results dataset.", "error");
+    // Fall back to selection hub
+    renderResultsHub(container);
+    return;
+  }
+
+  // Clear any existing Chart.js instances to avoid canvas issues
+  if (comparisonChart) {
+    comparisonChart.destroy();
+    comparisonChart = null;
+  }
+
+  container.innerHTML = `
+    <div class="animated-slide-up">
+      <!-- Back to hub action button -->
+      <button class="results-back-btn" id="results-back-hub-btn">
+        <i data-lucide="arrow-left"></i>
+        <span>Back to Results Hub</span>
+      </button>
+
+      <div class="page-title-section" style="margin-top: 8px;">
+        <div>
+          <h2 class="page-title">${dataset.title}</h2>
+          <p class="page-subtitle">${dataset.batch} — ${dataset.university}</p>
+        </div>
+      </div>
 
       <!-- ============================== -->
       <!--     ROLL NUMBER SEARCH         -->
@@ -60,7 +187,7 @@ export async function initResultsView(container) {
         <div class="results-search-bar" id="results-search-bar">
           <div class="results-input-wrapper">
             <i data-lucide="hash" class="results-input-icon"></i>
-            <input type="text" id="result-search-input" placeholder="Enter Roll Number (e.g., 231305779917)" autocomplete="off" />
+            <input type="text" id="result-search-input" placeholder="Enter Roll Number (e.g., 231305779893)" autocomplete="off" />
           </div>
           <button class="primary-btn results-search-btn" id="result-search-btn">
             <i data-lucide="search"></i>
@@ -79,7 +206,7 @@ export async function initResultsView(container) {
         <h3 class="section-title" style="margin-bottom: 6px;">
           <i data-lucide="trophy" style="color: var(--warning);"></i> Batch Leaderboard
         </h3>
-        <p class="results-section-desc">Top 10 students by Grand Total in Semester 4 Mathematics Major.</p>
+        <p class="results-section-desc">Top 10 students by Grand Total in this semester exam.</p>
         
         <div class="styled-table-wrapper" style="overflow-x: auto; margin-top: 16px;">
           <table class="styled-table results-leaderboard-table" id="leaderboard-table">
@@ -131,50 +258,22 @@ export async function initResultsView(container) {
     </div>
   `;
 
-  lucide.createIcons();
+  // Bind back to hub button action
+  container.querySelector('#results-back-hub-btn').addEventListener('click', () => {
+    window.location.hash = '#results';
+  });
 
-  // Load data
-  await loadAllResultsData();
-
-  // Render announcements
-  renderAnnouncementsTable();
-
-  // Render leaderboard
+  // Render leaderboard elements
   renderLeaderboard();
 
-  // Bind search
+  // Bind search handlers
   bindSearchHandlers(container);
 
-  // Bind comparison
+  // Bind comparison handlers
   bindCompareHandlers(container);
+
+  lucide.createIcons();
 }
-
-
-// ========== DATA LOADING ==========
-
-async function loadAllResultsData() {
-  // Load sem4 maths results
-  if (sem4MathsResults.length === 0) {
-    try {
-      const res = await fetch('data/sem4_maths_results.json');
-      sem4MathsResults = await res.json();
-    } catch (err) {
-      console.error("Error fetching sem4 maths results: ", err);
-      showToast("Failed to load semester results data.", "error");
-    }
-  }
-
-  // Load announcements
-  if (!announcementsData) {
-    try {
-      const res = await fetch('data/results.json');
-      announcementsData = await res.json();
-    } catch (err) {
-      console.error("Error fetching announcements: ", err);
-    }
-  }
-}
-
 
 // ========== ANNOUNCEMENTS TABLE ==========
 
@@ -199,7 +298,6 @@ function renderAnnouncementsTable() {
 
   lucide.createIcons();
 }
-
 
 // ========== SEARCH FEATURE ==========
 
@@ -230,7 +328,7 @@ function performSearch() {
     return;
   }
 
-  const student = sem4MathsResults.find(s => s.roll_number === rollNumber);
+  const student = currentResultsDataset.find(s => s.roll_number === rollNumber);
 
   if (!student) {
     output.innerHTML = `
@@ -276,7 +374,7 @@ function renderStudentCard(container, student) {
   }
 
   // Calculate rank
-  const sorted = [...sem4MathsResults].sort((a, b) => b.grand_total - a.grand_total);
+  const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
   const rank = sorted.findIndex(s => s.roll_number === student.roll_number) + 1;
 
   container.innerHTML = `
@@ -289,7 +387,7 @@ function renderStudentCard(container, student) {
           <h3 class="results-student-name">${student.student_name}</h3>
           <div class="results-student-meta">
             <span><i data-lucide="hash"></i> ${student.roll_number}</span>
-            <span><i data-lucide="bar-chart-2"></i> Rank #${rank} of ${sem4MathsResults.length}</span>
+            <span><i data-lucide="bar-chart-2"></i> Rank #${rank} of ${currentResultsDataset.length}</span>
           </div>
         </div>
         <div class="results-student-status ${statusClass}">
@@ -344,15 +442,14 @@ function renderStudentCard(container, student) {
   lucide.createIcons();
 }
 
-
 // ========== LEADERBOARD ==========
 
 function renderLeaderboard() {
   const tbody = document.getElementById('leaderboard-table-body');
-  if (!tbody || sem4MathsResults.length === 0) return;
+  if (!tbody || currentResultsDataset.length === 0) return;
 
   // Sort by grand_total descending
-  const sorted = [...sem4MathsResults].sort((a, b) => b.grand_total - a.grand_total);
+  const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
   const top10 = sorted.slice(0, 10);
 
   tbody.innerHTML = top10.map((student, index) => {
@@ -400,7 +497,6 @@ function renderLeaderboard() {
   });
 }
 
-
 // ========== HEAD-TO-HEAD COMPARISON ==========
 
 function bindCompareHandlers(container) {
@@ -435,8 +531,8 @@ function performComparison() {
     return;
   }
 
-  const student1 = sem4MathsResults.find(s => s.roll_number === roll1);
-  const student2 = sem4MathsResults.find(s => s.roll_number === roll2);
+  const student1 = currentResultsDataset.find(s => s.roll_number === roll1);
+  const student2 = currentResultsDataset.find(s => s.roll_number === roll2);
 
   // Handle errors
   const errors = [];
@@ -461,7 +557,7 @@ function performComparison() {
 }
 
 function renderComparison(container, s1, s2) {
-  const sorted = [...sem4MathsResults].sort((a, b) => b.grand_total - a.grand_total);
+  const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
   const rank1 = sorted.findIndex(s => s.roll_number === s1.roll_number) + 1;
   const rank2 = sorted.findIndex(s => s.roll_number === s2.roll_number) + 1;
 
@@ -579,7 +675,7 @@ function renderComparison(container, s1, s2) {
 
   lucide.createIcons();
 
-  // Render Radar Chart
+  // Render Radar Chart visual representation
   renderRadarChart(s1, s2, subjectKeys);
 }
 
@@ -587,7 +683,7 @@ function renderRadarChart(s1, s2, subjectKeys) {
   const canvas = document.getElementById('compare-radar-chart');
   if (!canvas) return;
 
-  // Destroy previous chart if exists
+  // Destroy previous chart instance if it exists
   if (comparisonChart) {
     comparisonChart.destroy();
     comparisonChart = null;
@@ -686,8 +782,7 @@ function renderRadarChart(s1, s2, subjectKeys) {
   });
 }
 
-
-// ========== UTILITIES ==========
+// ========== UTILITY FUNCTIONS ==========
 
 function cleanSubjectName(name) {
   if (!name) return 'Unknown';

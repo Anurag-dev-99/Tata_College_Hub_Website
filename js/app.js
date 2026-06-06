@@ -214,7 +214,7 @@ function handleRouting() {
       initNoticeView(pageContainer);
       break;
     case '#results':
-      initResultsView(pageContainer);
+      initResultsView(pageContainer, queryParams);
       break;
     case '#calculators':
       initCalculatorsView(pageContainer);

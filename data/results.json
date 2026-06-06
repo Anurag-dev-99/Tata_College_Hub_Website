@@ -109,5 +109,16 @@
       "year": "2025",
       "overallPassPercentage": 81.3
     }
+  ],
+  "datasets": [
+    {
+      "id": "sem4_maths_2022-2026",
+      "title": "Semester 4 — Mathematics Major",
+      "batch": "Session 2022-2026",
+      "university": "Kolhan University",
+      "date": "2026-06-06",
+      "status": "Declared",
+      "file": "sem4_maths_results.json"
+    }
   ]
 }
