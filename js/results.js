@@ -58,7 +58,7 @@ function renderResultsHub(container) {
   if (datasetsMetadata.length === 0) {
     cardsHtml = `
       <div class="card" style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 40px;">
-        <i data-lucide="alert-circle" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px; margin: 0 auto 12px auto;"></i>
+        <i data-lucide="alert-circle" style="width: 48px; height: 48px; color: var(--text-muted); margin: 0 auto 12px auto;"></i>
         <p>No result dashboards are currently available.</p>
       </div>
     `;
@@ -182,16 +182,21 @@ async function renderExamDashboard(container, dataset) {
         <h3 class="section-title" style="margin-bottom: 6px;">
           <i data-lucide="search" style="color: var(--primary);"></i> Search Student Result
         </h3>
-        <p class="results-section-desc">Enter your roll number to view detailed marks and pass/fail status.</p>
+        <p class="results-section-desc">Enter your roll number or student name to view detailed marks cards.</p>
         
-        <div class="results-search-bar" id="results-search-bar">
-          <div class="results-input-wrapper">
-            <i data-lucide="hash" class="results-input-icon"></i>
-            <input type="text" id="result-search-input" placeholder="Enter Roll Number (e.g., 231305779893)" autocomplete="off" />
+        <div class="results-search-bar" id="results-search-bar" style="position: relative; flex-wrap: wrap;">
+          <div class="results-input-wrapper" style="position: relative; flex: 1; min-width: 200px;">
+            <i data-lucide="search" class="results-input-icon"></i>
+            <input type="text" id="result-search-input" placeholder="Type Roll Number or Name..." autocomplete="off" />
+            <div id="results-search-suggestions" class="results-search-suggestions hidden"></div>
           </div>
           <button class="primary-btn results-search-btn" id="result-search-btn">
             <i data-lucide="search"></i>
             <span>Search</span>
+          </button>
+          <button class="secondary-btn" id="result-browse-all-btn" style="flex-shrink: 0;" title="Browse all student marks">
+            <i data-lucide="users"></i>
+            <span>Browse All</span>
           </button>
         </div>
 
@@ -299,11 +304,13 @@ function renderAnnouncementsTable() {
   lucide.createIcons();
 }
 
-// ========== SEARCH FEATURE ==========
+// ========== SEARCH & AUTOCOMPLETE LOGIC ==========
 
 function bindSearchHandlers(container) {
   const searchBtn = container.querySelector('#result-search-btn');
   const searchInput = container.querySelector('#result-search-input');
+  const suggestionsDiv = container.querySelector('#results-search-suggestions');
+  const browseBtn = container.querySelector('#result-browse-all-btn');
 
   if (searchBtn) {
     searchBtn.addEventListener('click', () => performSearch());
@@ -311,8 +318,66 @@ function bindSearchHandlers(container) {
 
   if (searchInput) {
     searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') performSearch();
+      if (e.key === 'Enter') {
+        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
+        performSearch();
+      }
     });
+
+    // Autocomplete text listener
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value.toLowerCase().trim();
+      if (!suggestionsDiv) return;
+
+      if (val.length < 1) {
+        suggestionsDiv.classList.add('hidden');
+        suggestionsDiv.innerHTML = '';
+        return;
+      }
+
+      // Filter matches by name or roll number
+      const matches = currentResultsDataset.filter(s => 
+        s.roll_number.includes(val) || 
+        s.student_name.toLowerCase().includes(val)
+      ).slice(0, 6);
+
+      if (matches.length === 0) {
+        suggestionsDiv.classList.add('hidden');
+        suggestionsDiv.innerHTML = '';
+        return;
+      }
+
+      suggestionsDiv.innerHTML = matches.map(s => `
+        <div class="results-suggestion-item" data-roll="${s.roll_number}">
+          <span class="suggestion-name">${s.student_name}</span>
+          <span class="suggestion-roll">${s.roll_number}</span>
+        </div>
+      `).join('');
+
+      suggestionsDiv.classList.remove('hidden');
+
+      // Bind clicks on suggestions list
+      suggestionsDiv.querySelectorAll('.results-suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const roll = item.getAttribute('data-roll');
+          searchInput.value = roll;
+          suggestionsDiv.classList.add('hidden');
+          performSearch();
+        });
+      });
+    });
+  }
+
+  // Dismiss autocomplete dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (searchInput && suggestionsDiv && !searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+      suggestionsDiv.classList.add('hidden');
+    }
+  });
+
+  // Bind Browse All button
+  if (browseBtn) {
+    browseBtn.addEventListener('click', () => openBrowseAllModal());
   }
 }
 
@@ -321,14 +386,19 @@ function performSearch() {
   const output = document.getElementById('result-search-output');
   if (!input || !output) return;
 
-  const rollNumber = input.value.trim();
+  const query = input.value.trim().toLowerCase();
 
-  if (!rollNumber) {
-    showToast("Please enter a roll number to search.", "warning");
+  if (!query) {
+    showToast("Please enter a roll number or name.", "warning");
     return;
   }
 
-  const student = currentResultsDataset.find(s => s.roll_number === rollNumber);
+  // Match by roll number or exact name, or fallback to fuzzy name includes
+  const student = currentResultsDataset.find(s => 
+    s.roll_number === query || 
+    s.student_name.toLowerCase() === query ||
+    s.student_name.toLowerCase().includes(query)
+  );
 
   if (!student) {
     output.innerHTML = `
@@ -336,8 +406,8 @@ function performSearch() {
         <div class="results-error-icon">
           <i data-lucide="user-x"></i>
         </div>
-        <h4>Roll Number Not Found</h4>
-        <p>No student found with roll number <strong>"${escapeHtml(rollNumber)}"</strong>. Please check and try again.</p>
+        <h4>Student Not Found</h4>
+        <p>No student matching <strong>"${escapeHtml(query)}"</strong> was found. Please check spelling or roll number.</p>
       </div>
     `;
     lucide.createIcons();
@@ -347,14 +417,125 @@ function performSearch() {
   renderStudentCard(output, student);
 }
 
+// ========== BROWSE ALL MODAL ==========
+
+function openBrowseAllModal() {
+  const modal = document.getElementById('universal-modal');
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+  if (!modal || !title || !body) return;
+
+  title.textContent = "Browse All Student Results";
+
+  // Sort by total descending (ranks)
+  const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
+
+  // Render modal content
+  const renderRows = (dataList) => {
+    return dataList.map(s => {
+      const rank = sorted.findIndex(item => item.roll_number === s.roll_number) + 1;
+      const isPass = s.result === 'Pass';
+      const rankBadge = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+      return `
+        <tr class="browse-results-row" data-roll="${s.roll_number}">
+          <td style="font-weight: 800; text-align: center; font-size: 0.85rem;">${rankBadge}</td>
+          <td style="font-weight: 600; font-size: 0.85rem;">${s.student_name}</td>
+          <td style="font-family: monospace; font-size: 0.78rem; color: var(--text-secondary);">${s.roll_number}</td>
+          <td style="font-weight: 700; text-align: center; color: var(--primary); font-size: 0.85rem;">${s.grand_total}</td>
+          <td style="text-align: center;">
+            <span class="badge-status ${isPass ? 'declared' : 'pending'}" style="font-size: 0.68rem; padding: 2px 6px;">${s.result}</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  body.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <p class="text-secondary" style="font-size: 0.82rem; line-height: 1.4; margin-bottom: 2px;">
+        Click on any student row below to load their detailed marks card dashboard.
+      </p>
+      
+      <input type="text" id="modal-browse-search" class="browse-results-filter" placeholder="Search by name or roll number..." autocomplete="off">
+      
+      <div class="browse-results-table-wrapper">
+        <table class="styled-table" style="margin: 0; min-width: 100%;">
+          <thead>
+            <tr>
+              <th style="width: 55px; text-align: center; font-size: 0.75rem;">Rank</th>
+              <th style="font-size: 0.75rem;">Student Name</th>
+              <th style="font-size: 0.75rem;">Roll Number</th>
+              <th style="width: 70px; text-align: center; font-size: 0.75rem;">Total</th>
+              <th style="width: 75px; text-align: center; font-size: 0.75rem;">Result</th>
+            </tr>
+          </thead>
+          <tbody id="browse-modal-table-body">
+            ${renderRows(sorted)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  lucide.createIcons();
+  modal.classList.remove('hidden');
+
+  // Helper function to bind click events to table rows
+  const bindRowClicks = () => {
+    body.querySelectorAll('.browse-results-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const roll = row.getAttribute('data-roll');
+        const searchInput = document.getElementById('result-search-input');
+        if (searchInput) {
+          searchInput.value = roll;
+          modal.classList.add('hidden');
+          performSearch();
+          // Scroll dynamically to the search output
+          const searchSection = document.getElementById('results-search-section');
+          if (searchSection) searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  };
+
+  bindRowClicks();
+
+  // Search input inside browse all modal
+  const modalSearch = body.querySelector('#modal-browse-search');
+  const tableBody = body.querySelector('#browse-modal-table-body');
+
+  if (modalSearch && tableBody) {
+    modalSearch.focus();
+    modalSearch.addEventListener('input', (e) => {
+      const val = e.target.value.toLowerCase().trim();
+      const filtered = sorted.filter(s => 
+        s.student_name.toLowerCase().includes(val) || 
+        s.roll_number.includes(val)
+      );
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 24px;">No student results match "${escapeHtml(e.target.value)}".</td></tr>`;
+      } else {
+        tableBody.innerHTML = renderRows(filtered);
+        bindRowClicks();
+      }
+    });
+  }
+}
+
+// ========== STUDENT MARKS CARD RENDER ==========
+
 function renderStudentCard(container, student) {
   const subjects = student.subjects;
   const isPass = student.result === 'Pass';
   const statusClass = isPass ? 'pass' : 'promoted';
   const statusLabel = student.result;
 
-  // Build subject rows
+  // Build desktop subject rows
   let subjectRows = '';
+  // Build mobile stacked cards subject content
+  let mobileSubjectRows = '';
+
   for (const [key, sub] of Object.entries(subjects)) {
     const subjectName = cleanSubjectName(sub.subject);
     const theory = sub.theory !== null && sub.theory !== undefined ? sub.theory : '-';
@@ -362,6 +543,7 @@ function renderStudentCard(container, student) {
     const practical = sub.practical !== null && sub.practical !== undefined ? sub.practical : '-';
     const total = sub.total !== null && sub.total !== undefined ? sub.total : '-';
 
+    // Desktop table row structure
     subjectRows += `
       <tr>
         <td class="subject-name-cell">${subjectName}</td>
@@ -371,14 +553,39 @@ function renderStudentCard(container, student) {
         <td class="mark-cell mark-total">${total}</td>
       </tr>
     `;
+
+    // Mobile block structure
+    mobileSubjectRows += `
+      <div class="results-mobile-mark-row">
+        <div class="res-mob-subject-title">${subjectName}</div>
+        <div class="res-mob-marks-grid">
+          <div class="res-mob-mark-item">
+            <span class="label">Theory</span>
+            <span class="value">${theory}</span>
+          </div>
+          <div class="res-mob-mark-item">
+            <span class="label">Internal</span>
+            <span class="value">${internal}</span>
+          </div>
+          <div class="res-mob-mark-item">
+            <span class="label">Practical</span>
+            <span class="value">${practical}</span>
+          </div>
+          <div class="res-mob-mark-item highlight">
+            <span class="label">Total Marks</span>
+            <span class="value">${total}</span>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
-  // Calculate rank
+  // Calculate student rank relative to dataset
   const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
   const rank = sorted.findIndex(s => s.roll_number === student.roll_number) + 1;
 
   container.innerHTML = `
-    <div class="results-student-card animated-slide-up">
+    <div class="results-student-card animated-slide-up" style="margin-top: 24px;">
       <div class="results-student-header">
         <div class="results-student-avatar">
           ${student.student_name.charAt(0)}
@@ -411,7 +618,8 @@ function renderStudentCard(container, student) {
         </div>
       </div>
 
-      <div class="results-marks-table-wrapper">
+      <!-- DESKTOP MODE: Traditional Marks Table -->
+      <div class="results-marks-table-wrapper desktop-marks-view">
         <table class="results-marks-table">
           <thead>
             <tr>
@@ -436,13 +644,26 @@ function renderStudentCard(container, student) {
           </tfoot>
         </table>
       </div>
+
+      <!-- MOBILE MODE: Mobile Friendly Stacked Cards list (Overflow scroll solved) -->
+      <div class="results-mobile-marks-list mobile-marks-view">
+        ${mobileSubjectRows}
+        <div class="results-mobile-mark-row" style="background: var(--primary-glow); border-color: var(--border-color-focus);">
+          <div class="res-mob-marks-grid" style="grid-template-columns: 1fr;">
+            <div class="res-mob-mark-item highlight" style="background: transparent; border: none; padding: 0; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="label" style="font-size: 0.95rem; font-weight: 700;">Grand Total</span>
+              <span class="value" style="font-size: 1.2rem; font-weight: 800;">${student.grand_total}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
   lucide.createIcons();
 }
 
-// ========== LEADERBOARD ==========
+// ========== LEADERBOARD RENDERING ==========
 
 function renderLeaderboard() {
   const tbody = document.getElementById('leaderboard-table-body');
@@ -469,7 +690,10 @@ function renderLeaderboard() {
         <td>
           <div class="leaderboard-student-cell">
             <div class="leaderboard-avatar">${student.student_name.charAt(0)}</div>
-            <span class="leaderboard-name">${student.student_name}</span>
+            <div class="leaderboard-name-wrapper">
+              <span class="leaderboard-name">${student.student_name}</span>
+              <span class="leaderboard-roll-sub">${student.roll_number}</span>
+            </div>
           </div>
         </td>
         <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">${student.roll_number}</td>
@@ -480,7 +704,7 @@ function renderLeaderboard() {
     `;
   }).join('');
 
-  // Make leaderboard rows clickable to search
+  // Make leaderboard rows clickable to view student's marks immediately
   tbody.querySelectorAll('.leaderboard-row').forEach(row => {
     row.style.cursor = 'pointer';
     row.addEventListener('click', () => {
@@ -489,7 +713,7 @@ function renderLeaderboard() {
       if (searchInput) {
         searchInput.value = roll;
         performSearch();
-        // Scroll to search section
+        // Scroll to search container
         const searchSection = document.getElementById('results-search-section');
         if (searchSection) searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -506,7 +730,7 @@ function bindCompareHandlers(container) {
     compareBtn.addEventListener('click', () => performComparison());
   }
 
-  // Enter key on both inputs
+  // Bind Enter key trigger
   const input1 = container.querySelector('#compare-roll-1');
   const input2 = container.querySelector('#compare-roll-2');
 
@@ -531,8 +755,13 @@ function performComparison() {
     return;
   }
 
-  const student1 = currentResultsDataset.find(s => s.roll_number === roll1);
-  const student2 = currentResultsDataset.find(s => s.roll_number === roll2);
+  // Resolve roll number or name query matches
+  const student1 = currentResultsDataset.find(s => 
+    s.roll_number === roll1 || s.student_name.toLowerCase().includes(roll1.toLowerCase())
+  );
+  const student2 = currentResultsDataset.find(s => 
+    s.roll_number === roll2 || s.student_name.toLowerCase().includes(roll2.toLowerCase())
+  );
 
   // Handle errors
   const errors = [];
@@ -545,8 +774,8 @@ function performComparison() {
         <div class="results-error-icon">
           <i data-lucide="user-x"></i>
         </div>
-        <h4>Roll Number Not Found</h4>
-        <p>No student found with roll number${errors.length > 1 ? 's' : ''} <strong>"${errors.map(e => escapeHtml(e)).join('" and "')}"</strong>. Please check and try again.</p>
+        <h4>Student Not Found</h4>
+        <p>No student matching <strong>"${errors.map(e => escapeHtml(e)).join('" or "')}"</strong> was found. Please check spelling or roll number.</p>
       </div>
     `;
     lucide.createIcons();
@@ -701,6 +930,9 @@ function renderRadarChart(s1, s2, subjectKeys) {
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
   const labelColor = isDark ? '#94a3b8' : '#475569';
 
+  const isMobile = window.innerWidth <= 768;
+  const pointLabelSize = isMobile ? 8.2 : 11;
+
   comparisonChart = new Chart(canvas, {
     type: 'radar',
     data: {
@@ -734,7 +966,10 @@ function renderRadarChart(s1, s2, subjectKeys) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: isMobile ? { top: 10, bottom: 10, left: 15, right: 15 } : { top: 0, bottom: 0, left: 0, right: 0 }
+      },
       scales: {
         r: {
           beginAtZero: true,
@@ -747,11 +982,11 @@ function renderRadarChart(s1, s2, subjectKeys) {
           ticks: {
             color: labelColor,
             backdropColor: 'transparent',
-            font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" }
+            font: { size: isMobile ? 8 : 10, family: "'Plus Jakarta Sans', sans-serif" }
           },
           pointLabels: {
             color: labelColor,
-            font: { size: 11, weight: '600', family: "'Plus Jakarta Sans', sans-serif" },
+            font: { size: pointLabelSize, weight: '600', family: "'Plus Jakarta Sans', sans-serif" },
           }
         }
       },
@@ -760,8 +995,8 @@ function renderRadarChart(s1, s2, subjectKeys) {
           position: 'bottom',
           labels: {
             color: labelColor,
-            padding: 20,
-            font: { size: 12, weight: '600', family: "'Plus Jakarta Sans', sans-serif" },
+            padding: isMobile ? 12 : 20,
+            font: { size: isMobile ? 11 : 12, weight: '600', family: "'Plus Jakarta Sans', sans-serif" },
             usePointStyle: true,
             pointStyle: 'circle',
           }
