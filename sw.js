@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'tata-hub-v38';
+const CACHE_NAME = 'tata-hub-v41';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

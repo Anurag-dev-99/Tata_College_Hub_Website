@@ -3550,3 +3550,133 @@ button, input, select, textarea {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* =============================================
+   COMPACT TOPPERS LIST (used inside side-by-side
+   leaderboard+toppers column on both sizes)
+   ============================================= */
+.results-toppers-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.results-topper-compact-row {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.results-topper-compact-row:last-child {
+  border-bottom: none;
+}
+
+.results-topper-compact-row:hover {
+  background: var(--bg-card-hover);
+}
+
+.rtc-medal {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rtc-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+
+.rtc-subject {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rtc-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rtc-score {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.18);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  min-width: 34px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* =============================================
+   MOBILE-ONLY: Stats Cards → compact 2×2 grid
+   ============================================= */
+@media (max-width: 768px) {
+  .results-stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .results-stat-card {
+    padding: 12px 14px !important;
+    gap: 4px !important;
+  }
+
+  .results-stat-card-header {
+    font-size: 0.65rem !important;
+    margin-bottom: 2px;
+  }
+
+  .results-stat-card-header span {
+    font-size: 0.65rem;
+  }
+
+  .results-stat-card-icon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .results-stat-card-value {
+    font-size: 1.25rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .results-stat-card-sub {
+    font-size: 0.68rem !important;
+    margin-top: 2px;
+  }
+
+  .results-stat-progress-bg {
+    margin-top: 6px !important;
+  }
+}

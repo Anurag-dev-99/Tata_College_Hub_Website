@@ -1496,32 +1496,39 @@ function updateSubjectToppers(container, filteredData) {
   }
 
   toppersContainer.innerHTML = `
-    <div class="animated-slide-up" style="margin-top: 32px; margin-bottom: 32px;">
-      <h3 class="section-title" style="margin-bottom: 12px;">
-        <i data-lucide="award" style="color: var(--warning);"></i> Subject Toppers
-      </h3>
-      <p class="results-section-desc" style="margin-bottom: 16px;">Highest scoring student for each individual subject paper. Click on a card to see their marks card.</p>
-      <div class="results-toppers-grid">
-        ${toppersList.map(([key, item]) => `
-          <div class="results-topper-card" data-roll="${item.student.roll_number}">
-            <div class="results-topper-avatar">
-              <i data-lucide="medal"></i>
+    <div class="animated-slide-up">
+      <div style="
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        overflow: visible;
+        position: relative;
+      ">
+        <h3 class="section-title" style="margin-bottom: 4px; font-size: 1rem;">
+          <i data-lucide="award" style="color: var(--warning); width:18px; height:18px;"></i> Subject Toppers
+        </h3>
+        <p class="results-section-desc" style="margin-bottom: 12px; font-size: 0.78rem;">Click a row to view marks card.</p>
+        <div class="results-toppers-compact-list">
+          ${toppersList.map(([key, item]) => `
+            <div class="results-topper-compact-row" data-roll="${item.student.roll_number}">
+              <div class="rtc-medal"><i data-lucide="medal" style="width:14px;height:14px;"></i></div>
+              <div class="rtc-info">
+                <span class="rtc-subject">${item.subjectName}</span>
+                <span class="rtc-name">${item.student.student_name}</span>
+              </div>
+              <span class="rtc-score" style="display:inline-block;flex-shrink:0;min-width:34px;text-align:center;white-space:nowrap;padding:3px 9px;border-radius:9999px;background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);color:var(--primary);font-weight:800;font-size:0.88rem;">${item.maxScore}</span>
             </div>
-            <div class="results-topper-info">
-              <span class="results-topper-subject" title="${item.subjectName}">${item.subjectName}</span>
-              <span class="results-topper-name" title="${item.student.student_name}">${item.student.student_name}</span>
-              <span class="results-topper-score">Marks: <strong>${item.maxScore}</strong></span>
-            </div>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
     </div>
   `;
 
-  // Bind clicks on topper cards
-  toppersContainer.querySelectorAll('.results-topper-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const roll = card.getAttribute('data-roll');
+  // Bind clicks on topper rows
+  toppersContainer.querySelectorAll('.results-topper-compact-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const roll = row.getAttribute('data-roll');
       const searchInput = document.getElementById('result-search-input');
       if (searchInput) {
         searchInput.value = roll;
