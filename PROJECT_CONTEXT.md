@@ -94,7 +94,7 @@ Tata_College_Hub_Website/
 
 ### PWA
 - Service worker uses **Stale-While-Revalidate** strategy for cached assets
-- Current cache name: `tata-hub-v29` (increment this every time data/code changes)
+- Current cache name: `tata-hub-v37` (increment this every time data/code changes)
 - Cached assets include all HTML, CSS, JS, and data JSON files
 - `offline.html` is served when a user has no connection
 
@@ -324,6 +324,8 @@ python -m http.server 8080
 | `tata-hub-v27` | Added Math Major Sem 1 PYQs + folder link |
 | `tata-hub-v28` | SEO improvements: canonical, OG image, Twitter cards, JSON-LD, robots.txt, sitemap |
 | `tata-hub-v29` | SEO fix: title 55 chars, description 140 chars, expanded fallback links |
+| `tata-hub-v36` | Mobile responsive fixes, autocomplete search, stacked marks card list, merged leaderboard columns, radar mobile fit |
+| `tata-hub-v37` | Radar chart centering with shortened labels, popstate modal back gesture intercept, batch leaderboard subject sorting dropdown |
 
 ---
 

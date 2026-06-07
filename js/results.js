@@ -208,15 +208,23 @@ async function renderExamDashboard(container, dataset) {
       <!--     BATCH LEADERBOARD          -->
       <!-- ============================== -->
       <div class="card results-leaderboard-section" id="results-leaderboard-section" style="margin-bottom: 32px;">
-        <h3 class="section-title" style="margin-bottom: 6px;">
-          <i data-lucide="trophy" style="color: var(--warning);"></i> Batch Leaderboard
-        </h3>
-        <p class="results-section-desc">Top 10 students by Grand Total in this semester exam.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <h3 class="section-title" style="margin-bottom: 0;">
+            <i data-lucide="trophy" style="color: var(--warning);"></i> Batch Leaderboard
+          </h3>
+          <div class="leaderboard-sort-container" style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Sort By:</span>
+            <select id="leaderboard-sort-select" style="padding: 6px 12px; border-radius: var(--radius-md); background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.8rem; font-weight: 600; outline: none; cursor: pointer;">
+              <option value="grand_total">Grand Total (Overall)</option>
+            </select>
+          </div>
+        </div>
+        <p class="results-section-desc" id="leaderboard-desc" style="margin-top: 6px; margin-bottom: 6px;">Top 10 students by Grand Total in this semester exam.</p>
         
         <div class="styled-table-wrapper" style="overflow-x: auto; margin-top: 16px;">
           <table class="styled-table results-leaderboard-table" id="leaderboard-table">
             <thead>
-              <tr>
+              <tr id="leaderboard-headers">
                 <th>Rank</th>
                 <th>Student Name</th>
                 <th>Roll Number</th>
@@ -268,8 +276,23 @@ async function renderExamDashboard(container, dataset) {
     window.location.hash = '#results';
   });
 
-  // Render leaderboard elements
-  renderLeaderboard();
+  // Populate leaderboard sorting select list dynamically
+  const sortSelect = container.querySelector('#leaderboard-sort-select');
+  const firstStudent = currentResultsDataset[0];
+  if (sortSelect && firstStudent) {
+    sortSelect.innerHTML = '<option value="grand_total">Grand Total (Overall)</option>';
+    for (const [key, sub] of Object.entries(firstStudent.subjects)) {
+      const cleanedName = cleanSubjectName(sub.subject);
+      sortSelect.innerHTML += `<option value="${key}">${cleanedName}</option>`;
+    }
+
+    sortSelect.addEventListener('change', (e) => {
+      renderLeaderboard(e.target.value);
+    });
+  }
+
+  // Render leaderboard elements (initially sorted by grand total)
+  renderLeaderboard('grand_total');
 
   // Bind search handlers
   bindSearchHandlers(container);
@@ -427,6 +450,14 @@ function openBrowseAllModal() {
 
   title.textContent = "Browse All Student Results";
 
+  // Push dummy state in history so back button closes the modal
+  history.pushState({ modalOpen: true }, '');
+
+  const handleModalBack = () => {
+    modal.classList.add('hidden');
+  };
+  window.addEventListener('popstate', handleModalBack, { once: true });
+
   // Sort by total descending (ranks)
   const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
 
@@ -489,6 +520,11 @@ function openBrowseAllModal() {
         if (searchInput) {
           searchInput.value = roll;
           modal.classList.add('hidden');
+          // Revert dummy history state
+          if (history.state && history.state.modalOpen) {
+            history.back();
+          }
+          window.removeEventListener('popstate', handleModalBack);
           performSearch();
           // Scroll dynamically to the search output
           const searchSection = document.getElementById('results-search-section');
@@ -665,12 +701,45 @@ function renderStudentCard(container, student) {
 
 // ========== LEADERBOARD RENDERING ==========
 
-function renderLeaderboard() {
+function renderLeaderboard(sortBy = 'grand_total') {
   const tbody = document.getElementById('leaderboard-table-body');
+  const headers = document.getElementById('leaderboard-headers');
+  const desc = document.getElementById('leaderboard-desc');
   if (!tbody || currentResultsDataset.length === 0) return;
 
-  // Sort by grand_total descending
-  const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
+  // Determine sorted list
+  let sorted = [];
+  if (sortBy === 'grand_total') {
+    sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
+    if (desc) desc.textContent = "Top 10 students by Grand Total in this semester exam.";
+    if (headers) {
+      headers.innerHTML = `
+        <th>Rank</th>
+        <th>Student Name</th>
+        <th>Roll Number</th>
+        <th>Grand Total</th>
+      `;
+    }
+  } else {
+    sorted = [...currentResultsDataset].sort((a, b) => {
+      const t1 = a.subjects[sortBy]?.total ?? 0;
+      const t2 = b.subjects[sortBy]?.total ?? 0;
+      return t2 - t1;
+    });
+
+    const firstStudent = currentResultsDataset[0];
+    const subName = cleanSubjectName(firstStudent.subjects[sortBy]?.subject);
+    if (desc) desc.textContent = `Top 10 students sorted by marks in ${subName}.`;
+    if (headers) {
+      headers.innerHTML = `
+        <th>Rank</th>
+        <th>Student Name</th>
+        <th>Roll Number</th>
+        <th>${subName} Marks</th>
+      `;
+    }
+  }
+
   const top10 = sorted.slice(0, 10);
 
   tbody.innerHTML = top10.map((student, index) => {
@@ -681,6 +750,14 @@ function renderLeaderboard() {
     if (rank === 1) { medalIcon = '🥇'; rankClass = 'rank-gold'; }
     else if (rank === 2) { medalIcon = '🥈'; rankClass = 'rank-silver'; }
     else if (rank === 3) { medalIcon = '🥉'; rankClass = 'rank-bronze'; }
+
+    const val = sortBy === 'grand_total' 
+      ? student.grand_total 
+      : (student.subjects[sortBy]?.total ?? '-');
+      
+    const subVal = sortBy === 'grand_total' 
+      ? '' 
+      : `<span style="display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; font-weight: 500;">Overall: ${student.grand_total}</span>`;
 
     return `
       <tr class="leaderboard-row ${rankClass}" data-roll="${student.roll_number}">
@@ -698,7 +775,8 @@ function renderLeaderboard() {
         </td>
         <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">${student.roll_number}</td>
         <td>
-          <span class="leaderboard-total">${student.grand_total}</span>
+          <span class="leaderboard-total">${val}</span>
+          ${subVal}
         </td>
       </tr>
     `;
@@ -1022,13 +1100,23 @@ function renderRadarChart(s1, s2, subjectKeys) {
 function cleanSubjectName(name) {
   if (!name) return 'Unknown';
   // Remove common verbose prefixes
-  return name
+  let cleaned = name
     .replace(/^MAJOR-[VIX]+-/i, '')
     .replace(/^Minor-[IIB]+-/i, '')
     .replace(/^Ability Enhancement Courses-[IVX]+ ?- ?/i, 'AEC: ')
     .replace(/^Value Addes Courses-[lIVX]* ?-? ?/i, 'VAC: ')
     .replace(/^Ability Enhancement Courses-[IVX]+-?/i, 'AEC: ')
     .trim();
+
+  // Custom abbreviations for extremely long subjects (fixes radar chart centering on mobile)
+  cleaned = cleaned
+    .replace(/Global Citizenship Education for Sustainable Development/gi, "Global Citizenship")
+    .replace(/Analytical Chemistry/gi, "Analyt. Chem")
+    .replace(/Digital Systems and Applications/gi, "Digital Sys")
+    .replace(/Digital Systems/gi, "Digital Sys")
+    .replace(/Mathematics/gi, "Math");
+
+  return cleaned;
 }
 
 function escapeHtml(str) {

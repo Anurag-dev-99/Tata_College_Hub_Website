@@ -74,6 +74,26 @@ async function initApp() {
   const countBadge = document.getElementById('notices-count-badge');
   if (countBadge) countBadge.textContent = activeNoticesCount;
 
+  // Global Universal Modal Close handlers
+  const universalModal = document.getElementById('universal-modal');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  if (universalModal && closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      universalModal.classList.add('hidden');
+      if (history.state && history.state.modalOpen) {
+        history.back();
+      }
+    });
+    universalModal.addEventListener('click', (e) => {
+      if (e.target === universalModal) {
+        universalModal.classList.add('hidden');
+        if (history.state && history.state.modalOpen) {
+          history.back();
+        }
+      }
+    });
+  }
+
   // Initialize any static Lucide icons (e.g. search icons in top bar)
   lucide.createIcons();
 }
