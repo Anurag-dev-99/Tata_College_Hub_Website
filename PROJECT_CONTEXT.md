@@ -43,7 +43,7 @@ Tata_College_Hub_Website/
 ├── index.html              # Single HTML shell — all views render inside #app-view
 ├── styles.css              # All CSS (dark/light theme, components, responsive)
 ├── manifest.json           # PWA manifest
-├── sw.js                   # Service Worker for offline caching (current: tata-hub-v29)
+├── sw.js                   # Service Worker for offline caching (current: tata-hub-v41)
 ├── offline.html            # Shown when user is offline
 ├── robots.txt              # SEO: tells crawlers what to index
 ├── sitemap.xml             # SEO: XML sitemap for Google
@@ -94,7 +94,7 @@ Tata_College_Hub_Website/
 
 ### PWA
 - Service worker uses **Stale-While-Revalidate** strategy for cached assets
-- Current cache name: `tata-hub-v37` (increment this every time data/code changes)
+- Current cache name: `tata-hub-v41` (increment this every time data/code changes)
 - Cached assets include all HTML, CSS, JS, and data JSON files
 - `offline.html` is served when a user has no connection
 
@@ -326,6 +326,10 @@ python -m http.server 8080
 | `tata-hub-v29` | SEO fix: title 55 chars, description 140 chars, expanded fallback links |
 | `tata-hub-v36` | Mobile responsive fixes, autocomplete search, stacked marks card list, merged leaderboard columns, radar mobile fit |
 | `tata-hub-v37` | Radar chart centering with shortened labels, popstate modal back gesture intercept, batch leaderboard subject sorting dropdown |
+| `tata-hub-v38` | Redesigned dashboard layout (Search moved to top, Leaderboard + Toppers rendered side-by-side on desktop), and added name-based autocomplete search suggestions to Compare Students inputs |
+| `tata-hub-v39` | Compact stats cards in 2x2 grid on mobile; redesigned Subject Toppers layout from large cards to a compact list of rows (`.results-topper-compact-row`) to save space and display medal, subject, name, and score badge cleanly |
+| `tata-hub-v40` | Removed outer `.card` container class from Subject Toppers card, replacing it with inline style card wrapper to prevent Android Chrome `backdrop-filter` overflow clipping bugs |
+| `tata-hub-v41` | Replaced Subject Toppers row flex layout with CSS Grid layout (`26px 1fr auto`) and set strict `width: 100%` with `box-sizing: border-box` to prevent scores/numbers from getting pushed off-screen and disappearing on mobile in "All Majors" filter mode |
 
 ---
 
