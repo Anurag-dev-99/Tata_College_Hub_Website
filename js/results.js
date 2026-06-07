@@ -191,11 +191,8 @@ async function renderExamDashboard(container, dataset) {
       <!-- Stats Cards -->
       <div id="results-stats-container"></div>
 
-      <!-- Subject Toppers -->
-      <div id="results-toppers-container"></div>
-
       <!-- ============================== -->
-      <!--     ROLL NUMBER SEARCH         -->
+      <!--     ROLL NUMBER SEARCH  (TOP)  -->
       <!-- ============================== -->
       <div class="card results-search-section" id="results-search-section" style="margin-bottom: 32px;">
         <h3 class="section-title" style="margin-bottom: 6px;">
@@ -223,40 +220,48 @@ async function renderExamDashboard(container, dataset) {
         <div id="result-search-output"></div>
       </div>
 
-      <!-- ============================== -->
-      <!--     BATCH LEADERBOARD          -->
-      <!-- ============================== -->
-      <div class="card results-leaderboard-section" id="results-leaderboard-section" style="margin-bottom: 32px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <h3 class="section-title" style="margin-bottom: 0;">
-            <i data-lucide="trophy" style="color: var(--warning);"></i> Batch Leaderboard
-          </h3>
-          <div class="leaderboard-sort-container" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Sort By:</span>
-            <select id="leaderboard-sort-select" style="padding: 6px 12px; border-radius: var(--radius-md); background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.8rem; font-weight: 600; outline: none; cursor: pointer;">
-              <option value="grand_total">Grand Total (Overall)</option>
-            </select>
+      <!-- ================================================ -->
+      <!--  LEADERBOARD + TOPPERS — SIDE BY SIDE ON DESKTOP -->
+      <!-- ================================================ -->
+      <div class="results-leaderboard-toppers-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; align-items: start;">
+
+        <!-- BATCH LEADERBOARD -->
+        <div class="card results-leaderboard-section" id="results-leaderboard-section" style="margin-bottom: 0; height: 100%;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <h3 class="section-title" style="margin-bottom: 0;">
+              <i data-lucide="trophy" style="color: var(--warning);"></i> Batch Leaderboard
+            </h3>
+            <div class="leaderboard-sort-container" style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Sort By:</span>
+              <select id="leaderboard-sort-select" style="padding: 6px 12px; border-radius: var(--radius-md); background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.8rem; font-weight: 600; outline: none; cursor: pointer;">
+                <option value="grand_total">Grand Total (Overall)</option>
+              </select>
+            </div>
+          </div>
+          <p class="results-section-desc" id="leaderboard-desc" style="margin-top: 6px; margin-bottom: 6px;">Top 10 students by Grand Total in this semester exam.</p>
+          
+          <div class="styled-table-wrapper" style="overflow-x: auto; margin-top: 16px;">
+            <table class="styled-table results-leaderboard-table" id="leaderboard-table">
+              <thead>
+                <tr id="leaderboard-headers">
+                  <th>Rank</th>
+                  <th>Student Name</th>
+                  <th>Roll Number</th>
+                  <th>Grand Total</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body">
+                <tr>
+                  <td colspan="4" style="text-align: center; color: var(--text-secondary);">Loading leaderboard...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <p class="results-section-desc" id="leaderboard-desc" style="margin-top: 6px; margin-bottom: 6px;">Top 10 students by Grand Total in this semester exam.</p>
-        
-        <div class="styled-table-wrapper" style="overflow-x: auto; margin-top: 16px;">
-          <table class="styled-table results-leaderboard-table" id="leaderboard-table">
-            <thead>
-              <tr id="leaderboard-headers">
-                <th>Rank</th>
-                <th>Student Name</th>
-                <th>Roll Number</th>
-                <th>Grand Total</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboard-table-body">
-              <tr>
-                <td colspan="4" style="text-align: center; color: var(--text-secondary);">Loading leaderboard...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+
+        <!-- SUBJECT TOPPERS (right column) -->
+        <div id="results-toppers-container"></div>
+
       </div>
 
       <!-- ============================== -->
@@ -266,17 +271,19 @@ async function renderExamDashboard(container, dataset) {
         <h3 class="section-title" style="margin-bottom: 6px;">
           <i data-lucide="git-compare" style="color: var(--info);"></i> Compare Students
         </h3>
-        <p class="results-section-desc">Enter two roll numbers to compare marks side by side with a radar chart.</p>
+        <p class="results-section-desc">Enter two roll numbers or student names to compare marks side by side with a radar chart.</p>
 
         <div class="results-compare-inputs" id="results-compare-inputs">
-          <div class="results-input-wrapper">
+          <div class="results-input-wrapper" style="position: relative;">
             <i data-lucide="user" class="results-input-icon"></i>
-            <input type="text" id="compare-roll-1" placeholder="Roll Number 1" autocomplete="off" />
+            <input type="text" id="compare-roll-1" placeholder="Roll Number or Name 1" autocomplete="off" />
+            <div id="compare-suggestions-1" class="results-search-suggestions hidden"></div>
           </div>
           <div class="results-vs-badge">VS</div>
-          <div class="results-input-wrapper">
+          <div class="results-input-wrapper" style="position: relative;">
             <i data-lucide="user" class="results-input-icon"></i>
-            <input type="text" id="compare-roll-2" placeholder="Roll Number 2" autocomplete="off" />
+            <input type="text" id="compare-roll-2" placeholder="Roll Number or Name 2" autocomplete="off" />
+            <div id="compare-suggestions-2" class="results-search-suggestions hidden"></div>
           </div>
           <button class="primary-btn results-search-btn" id="compare-btn">
             <i data-lucide="bar-chart-3"></i>
@@ -864,12 +871,72 @@ function bindCompareHandlers(container) {
     compareBtn.addEventListener('click', () => performComparison());
   }
 
-  // Bind Enter key trigger
   const input1 = container.querySelector('#compare-roll-1');
   const input2 = container.querySelector('#compare-roll-2');
+  const suggestions1 = container.querySelector('#compare-suggestions-1');
+  const suggestions2 = container.querySelector('#compare-suggestions-2');
 
-  if (input1) input1.addEventListener('keydown', (e) => { if (e.key === 'Enter') performComparison(); });
-  if (input2) input2.addEventListener('keydown', (e) => { if (e.key === 'Enter') performComparison(); });
+  // Helper: build and bind autocomplete suggestions for a compare input
+  function bindCompareSuggestions(inputEl, suggestionsEl, otherInputEl) {
+    if (!inputEl || !suggestionsEl) return;
+
+    inputEl.addEventListener('input', (e) => {
+      const val = e.target.value.toLowerCase().trim();
+      if (val.length < 1) {
+        suggestionsEl.classList.add('hidden');
+        suggestionsEl.innerHTML = '';
+        return;
+      }
+
+      const matches = currentResultsDataset.filter(s => {
+        const matchesMajor = selectedMajor === 'All' || s.major === selectedMajor;
+        const matchesQuery = s.roll_number.toLowerCase().includes(val) || s.student_name.toLowerCase().includes(val);
+        return matchesMajor && matchesQuery;
+      }).slice(0, 6);
+
+      if (matches.length === 0) {
+        suggestionsEl.classList.add('hidden');
+        suggestionsEl.innerHTML = '';
+        return;
+      }
+
+      suggestionsEl.innerHTML = matches.map(s => `
+        <div class="results-suggestion-item" data-roll="${s.roll_number}">
+          <span class="suggestion-name">${s.student_name}</span>
+          <span class="suggestion-roll">${s.roll_number}</span>
+        </div>
+      `).join('');
+
+      suggestionsEl.classList.remove('hidden');
+
+      suggestionsEl.querySelectorAll('.results-suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          inputEl.value = item.getAttribute('data-roll');
+          suggestionsEl.classList.add('hidden');
+        });
+      });
+    });
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        suggestionsEl.classList.add('hidden');
+        performComparison();
+      }
+    });
+  }
+
+  bindCompareSuggestions(input1, suggestions1, input2);
+  bindCompareSuggestions(input2, suggestions2, input1);
+
+  // Dismiss dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (suggestions1 && input1 && !input1.contains(e.target) && !suggestions1.contains(e.target)) {
+      suggestions1.classList.add('hidden');
+    }
+    if (suggestions2 && input2 && !input2.contains(e.target) && !suggestions2.contains(e.target)) {
+      suggestions2.classList.add('hidden');
+    }
+  });
 }
 
 function performComparison() {
@@ -880,12 +947,12 @@ function performComparison() {
   if (!output) return;
 
   if (!roll1 || !roll2) {
-    showToast("Please enter both roll numbers to compare.", "warning");
+    showToast("Please enter both roll numbers or names to compare.", "warning");
     return;
   }
 
-  if (roll1 === roll2) {
-    showToast("Please enter two different roll numbers.", "warning");
+  if (roll1.toLowerCase() === roll2.toLowerCase()) {
+    showToast("Please enter two different students to compare.", "warning");
     return;
   }
 

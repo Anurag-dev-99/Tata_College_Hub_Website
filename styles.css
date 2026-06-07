@@ -3544,5 +3544,9 @@ button, input, select, textarea {
   }
 }
 
-
-
+/* Leaderboard + Toppers side-by-side grid → stack on mobile */
+@media (max-width: 768px) {
+  .results-leaderboard-toppers-row {
+    grid-template-columns: 1fr !important;
+  }
+}
