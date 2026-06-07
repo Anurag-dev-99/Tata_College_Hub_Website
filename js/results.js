@@ -9,6 +9,7 @@ import { showToast } from './app.js';
 let currentResultsDataset = [];
 let datasetsMetadata = [];
 let announcementsData = null;
+let selectedMajor = 'All';
 
 // Radar chart instance reference (for cleanup)
 let comparisonChart = null;
@@ -160,6 +161,15 @@ async function renderExamDashboard(container, dataset) {
     comparisonChart = null;
   }
 
+  // Classify student majors
+  currentResultsDataset.forEach(s => {
+    s.major = getStudentMajor(s);
+  });
+
+  // Check if we have multiple majors
+  const distinctMajors = [...new Set(currentResultsDataset.map(s => s.major))].filter(m => m !== 'Unknown');
+  selectedMajor = 'All';
+
   container.innerHTML = `
     <div class="animated-slide-up">
       <!-- Back to hub action button -->
@@ -174,6 +184,15 @@ async function renderExamDashboard(container, dataset) {
           <p class="page-subtitle">${dataset.batch} — ${dataset.university}</p>
         </div>
       </div>
+
+      <!-- Filters Section -->
+      <div id="results-filter-container"></div>
+
+      <!-- Stats Cards -->
+      <div id="results-stats-container"></div>
+
+      <!-- Subject Toppers -->
+      <div id="results-toppers-container"></div>
 
       <!-- ============================== -->
       <!--     ROLL NUMBER SEARCH         -->
@@ -276,23 +295,41 @@ async function renderExamDashboard(container, dataset) {
     window.location.hash = '#results';
   });
 
-  // Populate leaderboard sorting select list dynamically
-  const sortSelect = container.querySelector('#leaderboard-sort-select');
-  const firstStudent = currentResultsDataset[0];
-  if (sortSelect && firstStudent) {
-    sortSelect.innerHTML = '<option value="grand_total">Grand Total (Overall)</option>';
-    for (const [key, sub] of Object.entries(firstStudent.subjects)) {
-      const cleanedName = cleanSubjectName(sub.subject);
-      sortSelect.innerHTML += `<option value="${key}">${cleanedName}</option>`;
-    }
+  // Render Major Filter Select Dropdown if multi-major dataset
+  const filterContainer = container.querySelector('#results-filter-container');
+  if (filterContainer && distinctMajors.length > 1) {
+    filterContainer.innerHTML = `
+      <div class="results-filter-bar animated-slide-up">
+        <div class="results-filter-group">
+          <span class="results-filter-label"><i data-lucide="filter" style="width: 14px; height: 14px; display: inline; vertical-align: middle; margin-right: 4px;"></i> Filter Major:</span>
+          <select id="results-major-filter-select" class="results-filter-select">
+            <option value="All">All Majors (${currentResultsDataset.length} Students)</option>
+            ${distinctMajors.map(m => {
+              const count = currentResultsDataset.filter(s => s.major === m).length;
+              return `<option value="${m}">${m} Major (${count})</option>`;
+            }).join('')}
+          </select>
+        </div>
+      </div>
+    `;
 
+    const majorSelect = filterContainer.querySelector('#results-major-filter-select');
+    majorSelect.addEventListener('change', (e) => {
+      selectedMajor = e.target.value;
+      updateDashboardData(container);
+    });
+  }
+
+  // Initial dashboard load
+  updateDashboardData(container);
+
+  // Setup Leaderboard sort selector change handler
+  const sortSelect = container.querySelector('#leaderboard-sort-select');
+  if (sortSelect) {
     sortSelect.addEventListener('change', (e) => {
       renderLeaderboard(e.target.value);
     });
   }
-
-  // Render leaderboard elements (initially sorted by grand total)
-  renderLeaderboard('grand_total');
 
   // Bind search handlers
   bindSearchHandlers(container);
@@ -358,11 +395,12 @@ function bindSearchHandlers(container) {
         return;
       }
 
-      // Filter matches by name or roll number
-      const matches = currentResultsDataset.filter(s => 
-        s.roll_number.includes(val) || 
-        s.student_name.toLowerCase().includes(val)
-      ).slice(0, 6);
+      // Filter matches by name, roll number, and selected major filter
+      const matches = currentResultsDataset.filter(s => {
+        const matchesMajor = selectedMajor === 'All' || s.major === selectedMajor;
+        const matchesQuery = s.roll_number.includes(val) || s.student_name.toLowerCase().includes(val);
+        return matchesMajor && matchesQuery;
+      }).slice(0, 6);
 
       if (matches.length === 0) {
         suggestionsDiv.classList.add('hidden');
@@ -458,8 +496,13 @@ function openBrowseAllModal() {
   };
   window.addEventListener('popstate', handleModalBack, { once: true });
 
+  // Filter dataset by major
+  const filteredData = selectedMajor === 'All'
+    ? currentResultsDataset
+    : currentResultsDataset.filter(s => s.major === selectedMajor);
+
   // Sort by total descending (ranks)
-  const sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
+  const sorted = [...filteredData].sort((a, b) => b.grand_total - a.grand_total);
 
   // Render modal content
   const renderRows = (dataList) => {
@@ -470,7 +513,10 @@ function openBrowseAllModal() {
       return `
         <tr class="browse-results-row" data-roll="${s.roll_number}">
           <td style="font-weight: 800; text-align: center; font-size: 0.85rem;">${rankBadge}</td>
-          <td style="font-weight: 600; font-size: 0.85rem;">${s.student_name}</td>
+          <td style="font-weight: 600; font-size: 0.85rem;">
+            ${s.student_name}
+            <span style="display: block; font-size: 0.68rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">Major: ${s.major}</span>
+          </td>
           <td style="font-family: monospace; font-size: 0.78rem; color: var(--text-secondary);">${s.roll_number}</td>
           <td style="font-weight: 700; text-align: center; color: var(--primary); font-size: 0.85rem;">${s.grand_total}</td>
           <td style="text-align: center;">
@@ -707,10 +753,20 @@ function renderLeaderboard(sortBy = 'grand_total') {
   const desc = document.getElementById('leaderboard-desc');
   if (!tbody || currentResultsDataset.length === 0) return;
 
+  // Filter dataset by major
+  const filteredData = selectedMajor === 'All'
+    ? currentResultsDataset
+    : currentResultsDataset.filter(s => s.major === selectedMajor);
+
+  if (filteredData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No leaderboard entries match filters.</td></tr>`;
+    return;
+  }
+
   // Determine sorted list
   let sorted = [];
   if (sortBy === 'grand_total') {
-    sorted = [...currentResultsDataset].sort((a, b) => b.grand_total - a.grand_total);
+    sorted = [...filteredData].sort((a, b) => b.grand_total - a.grand_total);
     if (desc) desc.textContent = "Top 10 students by Grand Total in this semester exam.";
     if (headers) {
       headers.innerHTML = `
@@ -721,21 +777,21 @@ function renderLeaderboard(sortBy = 'grand_total') {
       `;
     }
   } else {
-    sorted = [...currentResultsDataset].sort((a, b) => {
+    sorted = [...filteredData].sort((a, b) => {
       const t1 = a.subjects[sortBy]?.total ?? 0;
       const t2 = b.subjects[sortBy]?.total ?? 0;
       return t2 - t1;
     });
 
-    const firstStudent = currentResultsDataset[0];
-    const subName = cleanSubjectName(firstStudent.subjects[sortBy]?.subject);
-    if (desc) desc.textContent = `Top 10 students sorted by marks in ${subName}.`;
+    const firstStudent = filteredData[0];
+    const subName = cleanSubjectName(firstStudent?.subjects[sortBy]?.subject);
+    if (desc) desc.textContent = `Top 10 students sorted by marks in ${subName || 'Subject'}.`;
     if (headers) {
       headers.innerHTML = `
         <th>Rank</th>
         <th>Student Name</th>
         <th>Roll Number</th>
-        <th>${subName} Marks</th>
+        <th>${subName || 'Subject'} Marks</th>
       `;
     }
   }
@@ -885,10 +941,29 @@ function renderComparison(container, s1, s2) {
     const highlightClass1 = t1 > t2 ? 'compare-winner' : t1 < t2 ? 'compare-loser' : '';
     const highlightClass2 = t2 > t1 ? 'compare-winner' : t2 < t1 ? 'compare-loser' : '';
 
+    const name1 = cleanSubjectName(sub1.subject);
+    const name2 = cleanSubjectName(sub2.subject);
+    let displaySubjectName = name1;
+    if (name1 !== name2) {
+      const majorPrefixMatch1 = name1.match(/^(Major\s+[A-Z0-9]+):\s*(.*)/i);
+      const majorPrefixMatch2 = name2.match(/^(Major\s+[A-Z0-9]+):\s*(.*)/i);
+      if (majorPrefixMatch1 && majorPrefixMatch2 && majorPrefixMatch1[1] === majorPrefixMatch2[1]) {
+        displaySubjectName = `${majorPrefixMatch1[1]}: ${majorPrefixMatch1[2]} / ${majorPrefixMatch2[2]}`;
+      } else {
+        const minorPrefixMatch1 = name1.match(/^(Minor):\s*(.*)/i);
+        const minorPrefixMatch2 = name2.match(/^(Minor):\s*(.*)/i);
+        if (minorPrefixMatch1 && minorPrefixMatch2) {
+          displaySubjectName = `Minor: ${minorPrefixMatch1[2]} / ${minorPrefixMatch2[2]}`;
+        } else {
+          displaySubjectName = `${name1} / ${name2}`;
+        }
+      }
+    }
+
     comparisonRows += `
       <tr>
         <td class="mark-cell ${highlightClass1}">${t1}</td>
-        <td class="subject-name-cell compare-subject-center">${cleanSubjectName(sub1.subject)}</td>
+        <td class="subject-name-cell compare-subject-center">${displaySubjectName}</td>
         <td class="mark-cell ${highlightClass2}">${t2}</td>
       </tr>
     `;
@@ -997,8 +1072,29 @@ function renderRadarChart(s1, s2, subjectKeys) {
   }
 
   const labels = subjectKeys.map(key => {
-    const sub = s1.subjects[key];
-    return sub ? cleanSubjectName(sub.subject) : key;
+    const sub1 = s1.subjects[key];
+    const sub2 = s2.subjects[key];
+    if (!sub1 && !sub2) return key;
+    if (sub1 && !sub2) return cleanSubjectName(sub1.subject);
+    if (!sub1 && sub2) return cleanSubjectName(sub2.subject);
+    
+    const name1 = cleanSubjectName(sub1.subject);
+    const name2 = cleanSubjectName(sub2.subject);
+    if (name1 === name2) return name1;
+    
+    const majorPrefixMatch1 = name1.match(/^(Major\s+[A-Z0-9]+):\s*(.*)/i);
+    const majorPrefixMatch2 = name2.match(/^(Major\s+[A-Z0-9]+):\s*(.*)/i);
+    if (majorPrefixMatch1 && majorPrefixMatch2 && majorPrefixMatch1[1] === majorPrefixMatch2[1]) {
+      return `${majorPrefixMatch1[1]}: ${majorPrefixMatch1[2]} / ${majorPrefixMatch2[2]}`;
+    }
+    
+    const minorPrefixMatch1 = name1.match(/^(Minor):\s*(.*)/i);
+    const minorPrefixMatch2 = name2.match(/^(Minor):\s*(.*)/i);
+    if (minorPrefixMatch1 && minorPrefixMatch2) {
+      return `Minor: ${minorPrefixMatch1[2]} / ${minorPrefixMatch2[2]}`;
+    }
+    
+    return `${name1} / ${name2}`;
   });
 
   const data1 = subjectKeys.map(key => s1.subjects[key]?.total ?? 0);
@@ -1099,22 +1195,65 @@ function renderRadarChart(s1, s2, subjectKeys) {
 
 function cleanSubjectName(name) {
   if (!name) return 'Unknown';
-  // Remove common verbose prefixes
-  let cleaned = name
-    .replace(/^MAJOR-[VIX]+-/i, '')
-    .replace(/^Minor-[IIB]+-/i, '')
-    .replace(/^Ability Enhancement Courses-[IVX]+ ?- ?/i, 'AEC: ')
-    .replace(/^Value Addes Courses-[lIVX]* ?-? ?/i, 'VAC: ')
-    .replace(/^Ability Enhancement Courses-[IVX]+-?/i, 'AEC: ')
-    .trim();
+  
+  let cleaned = name;
+  
+  // 1. Parse Majors
+  const majorMatch = name.match(/^MAJOR-([lIVX]+)\s*-\s*(.*)/i);
+  if (majorMatch) {
+    cleaned = `Major ${majorMatch[1].toUpperCase()}: ${majorMatch[2].trim()}`;
+  } 
+  // 2. Parse Minors
+  else if (name.toLowerCase().startsWith('minor')) {
+    const paperMatch = name.match(/Paper Name:?-?\s*(.*)/i);
+    if (paperMatch) {
+      cleaned = `Minor: ${paperMatch[1].trim()}`;
+    } else {
+      const parts = name.split('-');
+      if (parts.length >= 3) {
+        cleaned = `Minor: ${parts.slice(2).join('-').trim()}`;
+      } else {
+        cleaned = name.replace(/^Minor-[A-Z0-9]+-?/i, 'Minor: ');
+      }
+    }
+  }
+  // 3. Parse MDC
+  else if (name.toLowerCase().includes('multi disciplinary course')) {
+    cleaned = name.replace(/^Multi Disciplinary Course-II\s*-\s*/i, 'MDC: ').replace(/^Multi Disciplinary Course-II\s*/i, 'MDC: ').replace(/Geography-/, 'Geography');
+  }
+  // 4. Parse SEC
+  else if (name.toLowerCase().includes('skill enhancement course')) {
+    cleaned = name.replace(/^Skill Enhancement Course-II\s*-\s*/i, 'SEC: ').replace(/^Skill Enhancement Course-II-?\s*/i, 'SEC: ').replace(/^Skill Enhancement Course-ll\s*-\s*/i, 'SEC: ').replace(/^Skill Enhancement Course-\s*-\s*/i, 'SEC: ');
+  }
+  // 5. Parse AEC
+  else if (name.toLowerCase().includes('ability enhancement course')) {
+    cleaned = name.replace(/^Ability Enhancement Courses-II\s*-\s*/i, 'AEC: ').replace(/^Ability Enhancement Courses-\s*-\s*/i, 'AEC: ').replace(/^Ability Enhancement Courses-II-?\s*/i, 'AEC: ').replace(/^Ability Enhancement Courses-IV\s*-\s*/i, 'AEC: ').replace(/^Ability Enhancement Courses-IV-?\s*/i, 'AEC: ');
+  }
+  // 6. Parse VAC
+  else if (name.toLowerCase().includes('value addes course') || name.toLowerCase().includes('value added course')) {
+    cleaned = name.replace(/^Value Addes Courses-ll\s*-\s*/i, 'VAC: ').replace(/^Value Addes Courses-\s*-\s*/i, 'VAC: ').replace(/^Value Addes Courses-?\s*/i, 'VAC: ');
+  } else {
+    // General fallback cleaning
+    cleaned = name
+      .replace(/^MAJOR-[VIX]+-/i, '')
+      .replace(/^Minor-[IIB]+-/i, '')
+      .replace(/^Ability Enhancement Courses-[IVX]+ ?- ?/i, 'AEC: ')
+      .replace(/^Value Addes Courses-[lIVX]* ?-? ?/i, 'VAC: ')
+      .trim();
+  }
 
   // Custom abbreviations for extremely long subjects (fixes radar chart centering on mobile)
   cleaned = cleaned
     .replace(/Global Citizenship Education for Sustainable Development/gi, "Global Citizenship")
+    .replace(/Communication Skills & Personality development/gi, "Comm. Skills & Personality")
+    .replace(/News Writing and Reporting/gi, "News Writing")
+    .replace(/Chemistry in Everyday Life/gi, "Chem in Everyday Life")
+    .replace(/Electrical Circuits and Network Skills/gi, "Electrical Circuits")
     .replace(/Analytical Chemistry/gi, "Analyt. Chem")
     .replace(/Digital Systems and Applications/gi, "Digital Sys")
     .replace(/Digital Systems/gi, "Digital Sys")
-    .replace(/Mathematics/gi, "Math");
+    .replace(/Mathematics/gi, "Math")
+    .replace(/Composition/gi, "Comp");
 
   return cleaned;
 }
@@ -1123,4 +1262,243 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
+}
+
+// ========== DYNAMIC RESULTS DASHBOARD HELPERS ==========
+
+function getStudentMajor(student) {
+  if (!student || !student.subjects) return 'Unknown';
+  // Try major_ii or major_iii first
+  for (const key of ['major_ii', 'major_iii', 'major_vi', 'major_vii', 'major_viii']) {
+    const subObj = student.subjects[key];
+    if (subObj && subObj.subject) {
+      const title = subObj.subject.toLowerCase();
+      if (title.includes('mathematics') || title.includes('math')) return 'Mathematics';
+      if (title.includes('physics')) return 'Physics';
+      if (title.includes('chemistry')) return 'Chemistry';
+    }
+  }
+  // Fallback to check all subjects
+  for (const key in student.subjects) {
+    const subObj = student.subjects[key];
+    if (subObj && subObj.subject) {
+      const title = subObj.subject.toLowerCase();
+      if (title.includes('mathematics') || title.includes('math')) return 'Mathematics';
+      if (title.includes('physics')) return 'Physics';
+      if (title.includes('chemistry')) return 'Chemistry';
+    }
+  }
+  return 'General';
+}
+
+function getSubjectToppers(filteredData) {
+  if (!filteredData || filteredData.length === 0) return {};
+  const toppers = {};
+  
+  for (const student of filteredData) {
+    if (!student.subjects) continue;
+    for (const [key, subObj] of Object.entries(student.subjects)) {
+      if (!subObj || subObj.total === null || subObj.total === undefined) continue;
+      
+      const score = subObj.total;
+      const subName = cleanSubjectName(subObj.subject);
+      
+      if (!toppers[subName] || score > toppers[subName].maxScore) {
+        toppers[subName] = {
+          student,
+          maxScore: score,
+          subjectName: subName
+        };
+      }
+    }
+  }
+  return toppers;
+}
+
+function updateDashboardData(container) {
+  const filteredData = selectedMajor === 'All'
+    ? currentResultsDataset
+    : currentResultsDataset.filter(s => s.major === selectedMajor);
+
+  updateStatsCards(container, filteredData);
+  updateSubjectToppers(container, filteredData);
+  updateLeaderboardSelection(container, filteredData);
+}
+
+function updateStatsCards(container, filteredData) {
+  const statsContainer = container.querySelector('#results-stats-container');
+  if (!statsContainer) return;
+
+  if (filteredData.length === 0) {
+    statsContainer.innerHTML = '';
+    return;
+  }
+
+  const totalStudents = filteredData.length;
+  const passCount = filteredData.filter(s => s.result.toLowerCase() === 'pass').length;
+  const passPercent = totalStudents ? ((passCount / totalStudents) * 100).toFixed(1) : 0;
+  
+  // Sort by grand total to find highest
+  const sorted = [...filteredData].sort((a, b) => b.grand_total - a.grand_total);
+  const highestScore = sorted[0]?.grand_total || 0;
+  const highestName = sorted[0]?.student_name || 'N/A';
+  const highestRoll = sorted[0]?.roll_number || '';
+
+  // Calculate cohort average
+  const avgScore = totalStudents 
+    ? (filteredData.reduce((sum, s) => sum + s.grand_total, 0) / totalStudents).toFixed(1) 
+    : 0;
+
+  statsContainer.innerHTML = `
+    <div class="results-stats-grid animated-slide-up">
+      <div class="results-stat-card">
+        <div class="results-stat-card-header">
+          <span>Total Enrolled</span>
+          <div class="results-stat-card-icon blue"><i data-lucide="users" style="width:16px;height:16px;"></i></div>
+        </div>
+        <div class="results-stat-card-value">${totalStudents}</div>
+        <div class="results-stat-card-sub">Students in batch</div>
+      </div>
+
+      <div class="results-stat-card">
+        <div class="results-stat-card-header">
+          <span>Pass Percentage</span>
+          <div class="results-stat-card-icon green"><i data-lucide="check-circle" style="width:16px;height:16px;"></i></div>
+        </div>
+        <div class="results-stat-card-value">${passPercent}%</div>
+        <div class="results-stat-card-sub">${passCount} of ${totalStudents} Passed</div>
+        <div class="results-stat-progress-bg">
+          <div class="results-stat-progress-fill" style="width: ${passPercent}%;"></div>
+        </div>
+      </div>
+
+      <div class="results-stat-card" style="cursor: pointer;" id="stats-topper-card" data-roll="${highestRoll}">
+        <div class="results-stat-card-header">
+          <span>Batch Topper</span>
+          <div class="results-stat-card-icon amber"><i data-lucide="crown" style="width:16px;height:16px;"></i></div>
+        </div>
+        <div class="results-stat-card-value">${highestScore}</div>
+        <div class="results-stat-card-sub" style="font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="${highestName}">
+          ${highestName}
+        </div>
+      </div>
+
+      <div class="results-stat-card">
+        <div class="results-stat-card-header">
+          <span>Batch Average</span>
+          <div class="results-stat-card-icon purple"><i data-lucide="bar-chart" style="width:16px;height:16px;"></i></div>
+        </div>
+        <div class="results-stat-card-value">${avgScore}</div>
+        <div class="results-stat-card-sub">Avg grand total score</div>
+      </div>
+    </div>
+  `;
+
+  // Click on topper card searches for them
+  const topperCard = statsContainer.querySelector('#stats-topper-card');
+  if (topperCard && highestRoll) {
+    topperCard.addEventListener('click', () => {
+      const searchInput = document.getElementById('result-search-input');
+      if (searchInput) {
+        searchInput.value = highestRoll;
+        performSearch();
+        const searchSection = document.getElementById('results-search-section');
+        if (searchSection) searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  lucide.createIcons();
+}
+
+function updateSubjectToppers(container, filteredData) {
+  const toppersContainer = container.querySelector('#results-toppers-container');
+  if (!toppersContainer) return;
+
+  if (filteredData.length === 0) {
+    toppersContainer.innerHTML = '';
+    return;
+  }
+
+  const toppersMap = getSubjectToppers(filteredData);
+  const toppersList = Object.entries(toppersMap);
+
+  if (toppersList.length === 0) {
+    toppersContainer.innerHTML = '';
+    return;
+  }
+
+  toppersContainer.innerHTML = `
+    <div class="animated-slide-up" style="margin-top: 32px; margin-bottom: 32px;">
+      <h3 class="section-title" style="margin-bottom: 12px;">
+        <i data-lucide="award" style="color: var(--warning);"></i> Subject Toppers
+      </h3>
+      <p class="results-section-desc" style="margin-bottom: 16px;">Highest scoring student for each individual subject paper. Click on a card to see their marks card.</p>
+      <div class="results-toppers-grid">
+        ${toppersList.map(([key, item]) => `
+          <div class="results-topper-card" data-roll="${item.student.roll_number}">
+            <div class="results-topper-avatar">
+              <i data-lucide="medal"></i>
+            </div>
+            <div class="results-topper-info">
+              <span class="results-topper-subject" title="${item.subjectName}">${item.subjectName}</span>
+              <span class="results-topper-name" title="${item.student.student_name}">${item.student.student_name}</span>
+              <span class="results-topper-score">Marks: <strong>${item.maxScore}</strong></span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Bind clicks on topper cards
+  toppersContainer.querySelectorAll('.results-topper-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const roll = card.getAttribute('data-roll');
+      const searchInput = document.getElementById('result-search-input');
+      if (searchInput) {
+        searchInput.value = roll;
+        performSearch();
+        const searchSection = document.getElementById('results-search-section');
+        if (searchSection) searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  lucide.createIcons();
+}
+
+function updateLeaderboardSelection(container, filteredData) {
+  const sortSelect = container.querySelector('#leaderboard-sort-select');
+  if (!sortSelect || filteredData.length === 0) return;
+
+  // Get current sorting selection
+  const previousSortKey = sortSelect.value;
+
+  // Get all unique subject keys in the filtered dataset
+  const subjectKeysMap = {};
+  for (const student of filteredData) {
+    if (!student.subjects) continue;
+    for (const [key, subObj] of Object.entries(student.subjects)) {
+      if (!subObj || subObj.subject === undefined) continue;
+      const cleanedName = cleanSubjectName(subObj.subject);
+      subjectKeysMap[key] = cleanedName;
+    }
+  }
+
+  // Populate select
+  let optionsHtml = '<option value="grand_total">Grand Total (Overall)</option>';
+  for (const [key, cleanedName] of Object.entries(subjectKeysMap)) {
+    optionsHtml += `<option value="${key}">${cleanedName}</option>`;
+  }
+  sortSelect.innerHTML = optionsHtml;
+
+  // Restore selection if still valid, otherwise default to grand_total
+  if (subjectKeysMap[previousSortKey]) {
+    sortSelect.value = previousSortKey;
+    renderLeaderboard(previousSortKey);
+  } else {
+    sortSelect.value = 'grand_total';
+    renderLeaderboard('grand_total');
+  }
 }

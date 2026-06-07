@@ -119,6 +119,15 @@
       "date": "2026-06-06",
       "status": "Declared",
       "file": "sem4_maths_results.json"
+    },
+    {
+      "id": "sem2_master_2023-2027",
+      "title": "Semester 2 — Science Streams",
+      "batch": "Session 2023-2027",
+      "university": "Kolhan University",
+      "date": "2026-06-07",
+      "status": "Declared",
+      "file": "results_sem2_master.json"
     }
   ]
 }
